@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'config/Palette.dart';
-import 'pages/ConversationPageSlide.dart';
+// import 'pages/ConversationPageSlide.dart';
+import 'pages/RegisterPage.dart';
 
 void main() => runApp(Kopper());
 
@@ -13,7 +14,7 @@ class Kopper extends StatelessWidget {
         primaryColor: Palette.primaryColor,
 //        primarySwatch: Palette.primaryColor,
       ),
-      home: ConversationPageSlide(),
+      home: RegisterPage()//ConversationPageSlide(),
     );
   }
 }
