@@ -28,8 +28,8 @@ dependencies:
   rubber: ^0.3.2              # bottom sheet
   firebase_auth: ^0.14.0+4    # auth with firebase
   google_sign_in: ^4.0.7      # auth with google
-  flutter_bloc: ^4.0.0       # support BLoC pattern implementation
-  equatable: ^1.1.1           # easier class comparing using values
+  flutter_bloc: ^4.0.0        # support BLoC pattern implementation
+  equatable: ^0.5.0           # easier class comparing using values
   cloud_firestore: ^0.12.9+1  # firebase db
   image_picker: ^0.6.1+4      # image picker for gallery
   firebase_storage: ^3.0.6    # storage for storing image files
