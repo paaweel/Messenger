@@ -3,15 +3,15 @@ import 'package:kopper/models/User.dart';
 import 'package:kopper/providers/BaseProvider.dart';
 import 'package:kopper/providers/UserDataProvider.dart';
 
+// Interacts with database, saves user data
 class UserDataRepository {
   BaseUserDataProvider userDataProvider = UserDataProvider();
 
-  Future<User> saveDetailsFromGoogleAuth(FirebaseUser user) =>
+  Future<User> saveDetailsFromGoogleAuth(User user) =>
       userDataProvider.saveDetailsFromGoogleAuth(user);
 
-  Future<User> saveProfileDetails(
-          String uid, String profileImageUrl, int age, String username) =>
-      userDataProvider.saveProfileDetails(uid, profileImageUrl, age, username);
+  Future<User> saveProfileDetails(String username, String profileImageUrl) =>
+      userDataProvider.saveProfileDetails(username, profileImageUrl);
 
   Future<bool> isProfileComplete(String uid) =>
       userDataProvider.isProfileComplete(uid);

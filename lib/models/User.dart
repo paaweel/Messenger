@@ -1,28 +1,23 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class User{
-  String uid;
-  String documentId;
-  String name;
+  String firstName;
+  String lastName;
   String username;
-  int age;
+  String password;
   String photoUrl;
 
-  User({this.uid, this.documentId, this.name, this.username, this.age, this.photoUrl});
+  User({this.firstName, this.lastName, this.username, this.password, this.photoUrl});
 
-  factory User.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data;
+  factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      uid: data['uid'],
-      documentId: doc.documentID,
-      name: data['name'],
-      username: data['username'],
-      age: data['age'],
-      photoUrl: data['photoUrl']
+        firstName: json['firstName'] as String,
+        lastName: json['lastName'] as String,
+        username: json['username'] as String,
+        password: json['password'] as String
     );
   }
+  
   @override
   String toString() {
-   return '{ uid: $uid, documentId: $documentId, name: $name, age: $age, username: $username, photoUrl: $photoUrl }';
+   return '{ firstName: $firstName, lastName: $lastName, username: $username }';
   }
 } 

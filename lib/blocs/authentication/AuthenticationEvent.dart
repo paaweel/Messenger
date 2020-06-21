@@ -10,13 +10,23 @@ class AppLaunched extends AuthenticationEvent {
   String toString() => 'AppLaunched';
 }
 
-class ClickedGoogleLogin extends AuthenticationEvent {
+class ClickedLogin extends AuthenticationEvent {
+  final String password;
+  final String username;
+  ClickedLogin(this.username, this.password);
   @override
-  String toString() => 'ClickedGoogleLogin';
+  String toString() => 'ClickedLogin';
+}
+
+class ClickedRegister extends AuthenticationEvent {
+  final User user;
+  ClickedRegister(this.user);
+  @override
+  String toString() => 'ClickedLogin';
 }
 
 class LoggedIn extends AuthenticationEvent {
-  final FirebaseUser user;
+  final User user;
   LoggedIn(this.user);
   @override
   String toString() => 'LoggedIn';

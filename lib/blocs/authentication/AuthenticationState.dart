@@ -16,17 +16,10 @@ class AuthInProgress extends AuthenticationState{
 }
 
 class Authenticated extends AuthenticationState{
-  final FirebaseUser user;
+  final User user;
   Authenticated(this.user);
   @override
   String toString() => 'Authenticated';
-}
-
-class PreFillData extends AuthenticationState{
-  final User user;
-  PreFillData(this.user);
-  @override
-  String toString() => 'PreFillData';
 }
 
 class UnAuthenticated extends AuthenticationState{

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 // Color palette for the app
 class Palette{
   static Color primaryColor = Colors.white;
-  static Color accentColor =  Color(0xff4fc3f7);
+  static Color accentColor =  Color(0xFF00E676);//Color(0xff4fc3f7);
   static Color gradientStartColor = accentColor;
-  static Color gradientEndColor = Color(0xff6aa8fd);
+  static Color gradientEndColor = Color(0xFF00C853);//Color(0xff6aa8fd);
   static Color secondaryColor = Colors.black;
   static Color primaryTextColor = Colors.black;
   static Color primaryTextColorLight = Colors.white;

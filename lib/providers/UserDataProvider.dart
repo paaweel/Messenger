@@ -8,38 +8,38 @@ class UserDataProvider extends BaseUserDataProvider {
   final fireStoreDb = Firestore.instance;
 
   @override
-  Future<User> saveDetailsFromGoogleAuth(FirebaseUser user) async {
+  Future<User> saveDetailsFromGoogleAuth(User user) async {
     DocumentReference ref = fireStoreDb
         .collection(Paths.usersPath)
-        .document(user.uid); //reference of the user's document node in database/users. This node is created using uid
+        .document(user.username); //reference of the user's document node in database/users. This node is created using uid
     final bool userExists = await ref.snapshots().isEmpty; // check if user exists or not
     var data = {
       //add details received from google auth
-      'uid': user.uid,
-      'email': user.email,
-      'name': user.displayName,
+      'uid': user.username,
+      'email': "user.email",
+      'name': "user.displayName",
     };
     if (!userExists) { // if user entry exists then we would not want to override the photo url with the one received from googel auth
       data['photoUrl'] = user.photoUrl;
     }
     ref.setData(data, merge: true); // set the data
     final DocumentSnapshot currentDocument = await ref.get(); // get updated data reference
-    return User.fromFirestore(currentDocument); // create a user object and return
+    return user; // create a user object and return
   }
 
   @override
   Future<User> saveProfileDetails(
-      String uid, String profileImageUrl, int age, String username) async {
+      String username, String profileImageUrl) async {
     DocumentReference ref =
-        fireStoreDb.collection(Paths.usersPath).document(uid); //reference of the user's document node in database/users. This node is created using uid
+        fireStoreDb.collection(Paths.usersPath).document(username); //reference of the user's document node in database/users. This node is created using uid
     var data = {
       'photoUrl': profileImageUrl,
-      'age': age,
+      'age': 1,
       'username': username,
     };
     ref.setData(data, merge: true); // set the photourl, age and username
     final DocumentSnapshot currentDocument = await ref.get(); // get updated data back from firestore
-    return User.fromFirestore(currentDocument); // create a user object and return it
+    return User(); // create a user object and return it
   }
 
   @override
