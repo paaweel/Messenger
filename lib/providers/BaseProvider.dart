@@ -1,6 +1,8 @@
 import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:kopper/models/User.dart';
+import 'package:kopper/models/Contact.dart';
+import 'package:kopper/models/AuthenticatedUser.dart';
 
 abstract class BaseAuthenticationProvider{
   Future<User> signIn(User user);
@@ -8,12 +10,18 @@ abstract class BaseAuthenticationProvider{
   Future<void> logOutUser();
   Future<User> getCurrentUser();
   Future<bool> isLoggedIn();
+  Future<void> saveCurrentUser(User user);
+  Future<void> deleteCurrentUser();
 }
 
 abstract class BaseUserDataProvider{
-  Future<User> saveDetailsFromGoogleAuth(User user);
+  Future<User> saveDetails(User user);
   Future<User> saveProfileDetails(String username, String profileImageUrl);
-  Future<bool> isProfileComplete(String uid);
+  Future<bool> isProfileComplete();
+  Future<List<Contact>> getContacts();
+  Future<void> addContact(String username);
+  Future<User> getUser(String username);
+  Future<String> getUidByUsername(String username);
 }
 
 abstract class BaseStorageProvider{

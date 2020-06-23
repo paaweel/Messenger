@@ -6,8 +6,14 @@ class Urls {
 
   // Get requests
   static const String getUsers = address + "users";
+  static String getContacts(int userId) {
+    return address + "users/" + userId.toString() + "/" + "contacts";
+  }
 
   // Post requests
   static const String register = address + "users/" + "register";
   static const String login = address + "users/" + "authenticate";
+  static String postContacts(int userId) {
+    return address + "users/" + userId.toString() + "/" + "contacts";
+  }
 }

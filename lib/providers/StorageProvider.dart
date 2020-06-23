@@ -1,10 +1,13 @@
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:kopper/models/AuthenticatedUser.dart';
 import 'package:kopper/providers/BaseProvider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class StorageProvider extends BaseStorageProvider{
   final FirebaseStorage firebaseStorage = FirebaseStorage.instance;
+
   @override
   Future<String> uploadImage(File file, String path) async{
     StorageReference reference = firebaseStorage.ref().child(path); // get a reference to the path of the image directory

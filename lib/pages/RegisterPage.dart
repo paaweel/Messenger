@@ -9,6 +9,7 @@ import 'package:kopper/config/Palette.dart';
 import 'package:kopper/config/Styles.dart';
 import 'package:kopper/config/Transitions.dart';
 import 'package:kopper/models/User.dart';
+import 'package:kopper/pages/ContactListPage.dart';
 import 'package:kopper/pages/ConversationPageSlide.dart';
 import 'package:kopper/widgets/CircleIndicator.dart';
 import 'package:kopper/widgets/NumberPicker.dart';
@@ -481,7 +482,7 @@ class _RegisterPageState extends State<RegisterPage>
   navigateToHome() {
     Navigator.push(
       context,
-      SlideLeftRoute(page: ConversationPageSlide()),
+      SlideLeftRoute(page: ContactListPage()),
     );
   }
 

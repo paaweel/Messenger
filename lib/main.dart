@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:kopper/pages/ContactListPage.dart';
 import 'config/Palette.dart';
 import 'pages/RegisterPage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kopper/repositiories/AuthenticationRepository.dart';
-import 'package:kopper/repositiories/StorageRepository.dart';
-import 'package:kopper/repositiories/UserDataRepository.dart';
+import 'package:kopper/repositories/AuthenticationRepository.dart';
+import 'package:kopper/repositories/StorageRepository.dart';
+import 'package:kopper/repositories/UserDataRepository.dart';
 import 'package:kopper/blocs/authentication/AuthenticationBloc.dart';
-import 'package:kopper/pages/ConversationPageSlide.dart';
+import 'package:kopper/utils/SharedObjects.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //create instances of the repositories to supply them to the app
   final AuthenticationRepository authRepository = AuthenticationRepository();
   final UserDataRepository userDataRepository = UserDataRepository();
   final StorageRepository storageRepository = StorageRepository();
+  SharedObjects.prefs = await SharedPreferences.getInstance();
   runApp(
     BlocProvider(
       create: (context) => AuthenticationBloc(
@@ -34,6 +37,7 @@ class Kopper extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Palette.primaryColor,
 //        primarySwatch: Palette.primaryColor,
+          fontFamily: 'Manrope',
       ),
       // home: RegisterPage()
       home: BlocBuilder<AuthenticationBloc, AuthenticationState>(
@@ -41,7 +45,7 @@ class Kopper extends StatelessWidget {
           if (state is UnAuthenticated) {
             return RegisterPage();
           } else if (state is ProfileUpdated) {
-            return ConversationPageSlide();
+            return ContactListPage();
           } else {
             return RegisterPage();
           }

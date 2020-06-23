@@ -1,54 +1,106 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:kopper/config/Paths.dart';
+import 'package:kopper/config/Urls.dart';
+import 'package:kopper/utils/SharedObjects.dart';
 import 'package:kopper/models/User.dart';
+import 'package:kopper/models/Contact.dart';
 import 'package:kopper/providers/BaseProvider.dart';
+import 'package:kopper/utils/Exceptions.dart';
+import 'package:kopper/config/Constants.dart';
+import 'package:requests/requests.dart';
 
 class UserDataProvider extends BaseUserDataProvider {
   final fireStoreDb = Firestore.instance;
 
   @override
-  Future<User> saveDetailsFromGoogleAuth(User user) async {
-    DocumentReference ref = fireStoreDb
-        .collection(Paths.usersPath)
-        .document(user.username); //reference of the user's document node in database/users. This node is created using uid
-    final bool userExists = await ref.snapshots().isEmpty; // check if user exists or not
-    var data = {
-      //add details received from google auth
-      'uid': user.username,
-      'email': "user.email",
-      'name': "user.displayName",
-    };
-    if (!userExists) { // if user entry exists then we would not want to override the photo url with the one received from googel auth
-      data['photoUrl'] = user.photoUrl;
-    }
-    ref.setData(data, merge: true); // set the data
-    final DocumentSnapshot currentDocument = await ref.get(); // get updated data reference
-    return user; // create a user object and return
+  Future<User> saveDetails(User user) async {
+
+    return User(); // create a user object and return
   }
 
   @override
   Future<User> saveProfileDetails(
       String username, String profileImageUrl) async {
-    DocumentReference ref =
-        fireStoreDb.collection(Paths.usersPath).document(username); //reference of the user's document node in database/users. This node is created using uid
+    DocumentReference ref = fireStoreDb.collection(Paths.usersPath).document(
+        username); //reference of the user's document node in database/users. This node is created using uid
     var data = {
-      'photoUrl': profileImageUrl,
-      'age': 1,
+      // 'photoUrl': profileImageUrl,
+      // 'age': age,
       'username': username,
     };
     ref.setData(data, merge: true); // set the photourl, age and username
-    final DocumentSnapshot currentDocument = await ref.get(); // get updated data back from firestore
+    final DocumentSnapshot currentDocument =
+        await ref.get(); // get updated data back from firestore
     return User(); // create a user object and return it
   }
 
   @override
-  Future<bool> isProfileComplete(String uid) async {
-    DocumentReference ref =
-        fireStoreDb.collection(Paths.usersPath).document(uid);  // get reference to the user/ uid node
+  Future<bool> isProfileComplete() async {
+    DocumentReference ref = fireStoreDb.collection(Paths.usersPath).document(
+        SharedObjects.prefs
+            .get(Constants.sessionId)); // get reference to the user/ uid node
     final DocumentSnapshot currentDocument = await ref.get();
-    return (currentDocument.exists&&
+    return (currentDocument.exists &&
         currentDocument.data.containsKey('username') &&
-            currentDocument.data.containsKey('age')); // check if it exists, if yes then check if username and age field are there or not. If not then profile incomplete else complete
+        currentDocument.data.containsKey(
+            'age')); // check if it exists, if yes then check if username and age field are there or not. If not then profile incomplete else complete
+  }
+
+  @override
+  Future<List<Contact>> getContacts() async {
+    // final response = await Requests.get(Urls.getContacts());
+
+    List<Contact> contactList = List();
+
+    return contactList;
+  }
+
+  @override
+  Future<void> addContact(String username) async {
+    await getUser(username);
+    //create a node with the username provided in the contacts collection
+    DocumentReference ref = fireStoreDb
+        .collection(Paths.usersPath)
+        .document(SharedObjects.prefs.get(Constants.sessionId));
+    //await to fetch user details of the username provided and set data
+    var documentSnapshot = await ref.get();
+    print(documentSnapshot.data);
+    List<String> contacts = documentSnapshot.data['contacts'] != null
+        ? List.from(documentSnapshot.data['contacts'])
+        : List();
+    if (contacts.contains(username)) {
+      throw ContactAlreadyExistsException();
+    }
+    contacts.add(username);
+    ref.updateData({'contacts': contacts});
+  }
+
+  @override
+  Future<User> getUser(String username) async {
+    String uid = await getUidByUsername(username);
+
+
+    if (uid  == "-1") {
+      return User();
+    } else {
+      throw UserNotFoundException();
+    }
+  }
+
+  @override
+  Future<String> getUidByUsername(String username) async {
+    //get reference to the mapping using username
+    DocumentReference ref =
+        fireStoreDb.collection(Paths.usernameUidMapPath).document(username);
+    DocumentSnapshot documentSnapshot = await ref.get();
+    print(documentSnapshot.exists);
+    //check if uid mapping for supplied username exists
+    if (documentSnapshot != null &&
+        documentSnapshot.exists &&
+        documentSnapshot.data['uid'] != null) {
+      return documentSnapshot.data['uid'];
+    } else {
+      throw UsernameMappingUndefinedException();
+    }
   }
 }

@@ -2,12 +2,11 @@ import 'dart:async';
 import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:meta/meta.dart';
 
-import 'package:kopper/repositiories/AuthenticationRepository.dart';
-import 'package:kopper/repositiories/UserDataRepository.dart';
-import 'package:kopper/repositiories/StorageRepository.dart';
+import 'package:kopper/repositories/AuthenticationRepository.dart';
+import 'package:kopper/repositories/UserDataRepository.dart';
+import 'package:kopper/repositories/StorageRepository.dart';
 import 'package:kopper/config/Paths.dart';
 import 'package:kopper/models/User.dart';
 
@@ -42,7 +41,6 @@ class AuthenticationBloc
       yield* mapAppLaunchedToState();
     } else if (event is ClickedLogin) {
       yield* mapClickedLoginToState(event.username, event.password);
-//      yield* mapClickedGoogleLoginToState(User());
     } else if (event is LoggedIn) {
       yield* mapLoggedInToState(event.user);
     } else if (event is PickedProfilePicture) {
@@ -62,7 +60,7 @@ class AuthenticationBloc
       if (isSignedIn) {
         final user = await authenticationRepository.getCurrentUser();
         bool isProfileComplete =
-            await userDataRepository.isProfileComplete(user.username); // if he is signed in then check if his profile is complete
+            await userDataRepository.isProfileComplete(); // if he is signed in then check if his profile is complete
         print(isProfileComplete);
         if (isProfileComplete) {      //if profile is complete then redirect to the home page
           yield ProfileUpdated();
@@ -85,7 +83,7 @@ class AuthenticationBloc
       User authenticatedUser =
           await authenticationRepository.signIn(user);
       bool isProfileComplete =
-          await userDataRepository.isProfileComplete(authenticatedUser.username); // check if the user's profile is complete
+          await userDataRepository.isProfileComplete(); // check if the user's profile is complete
       print(isProfileComplete);
       if (isProfileComplete) {
         yield ProfileUpdated(); //if profile is complete go to home page
