@@ -49,6 +49,8 @@ class RequestsAuthenticationProvider extends BaseAuthenticationProvider {
     var user = User();
     user.username = await secureStorage.read(key: "username");
     user.password = await secureStorage.read(key: "password");
+    user.firstName = await secureStorage.read(key: "firstname");
+    user.lastName= await secureStorage.read(key: "lastname");
     return user;
   }
 
@@ -56,11 +58,15 @@ class RequestsAuthenticationProvider extends BaseAuthenticationProvider {
   Future<void> saveCurrentUser(User user) async {
     await secureStorage.write(key: "username", value: user.username);
     await secureStorage.write(key: "password", value: user.password);
+    await secureStorage.write(key: "username", value: user.firstName);
+    await secureStorage.write(key: "password", value: user.lastName);
   }
 
   @override
   Future<void> deleteCurrentUser() async {
     await secureStorage.delete(key: "username");
     await secureStorage.delete(key: "password");
+    await secureStorage.delete(key: "firstname");
+    await secureStorage.delete(key: "lastname");
   }
 }
