@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'BaseProvider.dart';
@@ -8,6 +10,7 @@ import 'package:kopper/models/User.dart';
 
 class RequestsAuthenticationProvider extends BaseAuthenticationProvider {
   final secureStorage = FlutterSecureStorage();
+  User currentUser;
 
   @override
   Future<User> signIn(User user) async {
@@ -24,34 +27,33 @@ class RequestsAuthenticationProvider extends BaseAuthenticationProvider {
       bodyEncoding: RequestBodyEncoding.JSON,
     );
     print(response.json());
-    print(response.json()['id'] == null);
-    print(User.fromJson(response.json()));
-    return response.json()['id'] == null
+    dynamic json = response.json();
+    return !response.success
         ? null
-        : User.fromJson(response.json());
+        : currentUser = User.fromJson(json);
   }
 
   @override
   Future<void> logOutUser() async {
-    return Future.wait([]); // terminate the session
+    return deleteCurrentUser();
   }
 
   @override
   Future<bool> isLoggedIn() async {
-    final user = await Requests.get(Urls.getUsers);
-    user.raiseForStatus();
-    print(user.content());
-    return true;
+    return getCurrentUser() != null;
   }
 
   @override
   Future<User> getCurrentUser() async {
-    var user = User();
-    user.username = await secureStorage.read(key: "username");
-    user.password = await secureStorage.read(key: "password");
-    user.firstName = await secureStorage.read(key: "firstname");
-    user.lastName= await secureStorage.read(key: "lastname");
-    return user;
+    return currentUser != null ? 
+          currentUser
+          : await secureStorage.read(key: "firstname") != null? 
+          currentUser = User(
+            firstName: await secureStorage.read(key: "firstname"),
+            lastName: await secureStorage.read(key: "lastname"),
+            username: await secureStorage.read(key: "username"),
+            password: await secureStorage.read(key: "password"))
+            : null;
   }
 
   @override

@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:kopper/models/User.dart';
 import 'package:kopper/models/Contact.dart';
-import 'package:kopper/models/AuthenticatedUser.dart';
 
 abstract class BaseAuthenticationProvider{
   Future<User> signIn(User user);

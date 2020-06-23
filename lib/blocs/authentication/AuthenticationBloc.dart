@@ -40,6 +40,7 @@ class AuthenticationBloc
     if (event is AppLaunched) {
       yield* mapAppLaunchedToState();
     } else if (event is ClickedLogin) {
+      print(event.username + event.password);
       yield* mapClickedLoginToState(event.username, event.password);
     } else if (event is LoggedIn) {
       yield* mapLoggedInToState(event.user);
@@ -59,15 +60,8 @@ class AuthenticationBloc
       final isSignedIn = await authenticationRepository.isLoggedIn(); // check if user is signed in
       if (isSignedIn) {
         final user = await authenticationRepository.getCurrentUser();
-        bool isProfileComplete =
-            await userDataRepository.isProfileComplete(); // if he is signed in then check if his profile is complete
-        print(isProfileComplete);
-        if (isProfileComplete) {      //if profile is complete then redirect to the home page
-          yield ProfileUpdated();
-        } else {
-          yield Authenticated(user); // else yield the authenticated state and redirect to profile page to complete profile.
-          add(LoggedIn(user)); // also disptach a login event so that the data from gauth can be prefilled
-        }
+        yield Authenticated(user); // else yield the authenticated state and redirect to profile page to complete profile.
+        add(LoggedIn(user)); // also disptach a login event so that the data from gauth can be prefilled
       } else {
         yield UnAuthenticated(); // is not signed in then show the home page
       }
@@ -103,9 +97,11 @@ class AuthenticationBloc
       User authenticatedUser = await authenticationRepository.logIn(username, password);
       if (authenticatedUser == null)
         yield UnAuthenticated();
-      else
+      else {
         yield Authenticated(authenticatedUser);
         add(LoggedIn(authenticatedUser));
+      }
+
     } catch (_, stacktrace) {
       print(stacktrace);
       yield UnAuthenticated(); // in case of error go back to first registration page
