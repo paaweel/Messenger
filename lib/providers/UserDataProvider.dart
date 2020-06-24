@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kopper/config/Paths.dart';
-import 'package:kopper/config/Urls.dart';
+// import 'package:kopper/config/Urls.dart';
 import 'package:kopper/utils/SharedObjects.dart';
 import 'package:kopper/models/User.dart';
 import 'package:kopper/models/Contact.dart';
 import 'package:kopper/providers/BaseProvider.dart';
 import 'package:kopper/utils/Exceptions.dart';
 import 'package:kopper/config/Constants.dart';
-import 'package:requests/requests.dart';
+// import 'package:requests/requests.dart';
 
 class UserDataProvider extends BaseUserDataProvider {
   final fireStoreDb = Firestore.instance;
@@ -21,25 +21,13 @@ class UserDataProvider extends BaseUserDataProvider {
   @override
   Future<User> saveProfileDetails(
       String username, String profileImageUrl) async {
-    DocumentReference ref = fireStoreDb.collection(Paths.usersPath).document(
-        username); //reference of the user's document node in database/users. This node is created using uid
-    var data = {
-      // 'photoUrl': profileImageUrl,
-      // 'age': age,
-      'username': username,
-    };
-    ref.setData(data, merge: true); // set the photourl, age and username
-    final DocumentSnapshot currentDocument =
-        await ref.get(); // get updated data back from firestore
+
     return User(); // create a user object and return it
   }
 
   @override
   Future<bool> isProfileComplete() async {
-    DocumentReference ref = fireStoreDb.collection(Paths.usersPath).document(
-        SharedObjects.prefs
-            .get(Constants.sessionId)); // get reference to the user/ uid node
-    final DocumentSnapshot currentDocument = await ref.get();
+
     return true;
   }
 

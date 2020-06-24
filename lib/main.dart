@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kopper/blocs/contacts/ContactsBloc.dart';
 import 'package:kopper/pages/ContactListPage.dart';
 import 'config/Palette.dart';
 import 'pages/RegisterPage.dart';
@@ -17,16 +18,23 @@ void main() async {
   final UserDataRepository userDataRepository = UserDataRepository();
   final StorageRepository storageRepository = StorageRepository();
   SharedObjects.prefs = await SharedPreferences.getInstance();
-  runApp(
-    BlocProvider(
-      create: (context) => AuthenticationBloc(
-          authenticationRepository: authRepository,
+  runApp(MultiBlocProvider(
+    providers: [
+      BlocProvider(
+        create: (context) => AuthenticationBloc(
+            authenticationRepository: authRepository,
+            userDataRepository: userDataRepository,
+            storageRepository: storageRepository)
+          ..add(AppLaunched()),
+      ),
+      BlocProvider<ContactsBloc>(
+        create: (context) => ContactsBloc(
           userDataRepository: userDataRepository,
-          storageRepository: storageRepository)
-        ..add(AppLaunched()),
-      child: Kopper(),
-    ),
-  );
+        ),
+      )
+    ],
+    child: Kopper(),
+  ));
 }
 
 class Kopper extends StatelessWidget {
@@ -37,7 +45,7 @@ class Kopper extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Palette.primaryColor,
 //        primarySwatch: Palette.primaryColor,
-          fontFamily: 'Manrope',
+        fontFamily: 'Manrope',
       ),
       // home: RegisterPage()
       home: BlocBuilder<AuthenticationBloc, AuthenticationState>(

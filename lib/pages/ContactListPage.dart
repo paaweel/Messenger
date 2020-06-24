@@ -8,8 +8,6 @@ import 'package:kopper/config/Decorations.dart';
 import 'package:kopper/config/Palette.dart';
 import 'package:kopper/config/Styles.dart';
 import 'package:kopper/models/Contact.dart';
-import 'package:kopper/repositories/UserDataRepository.dart';
-import 'package:kopper/utils/Exceptions.dart';
 import 'package:kopper/widgets/BottomSheetFixed.dart';
 import 'package:kopper/widgets/ContactRowWidget.dart';
 import 'package:kopper/widgets/GradientFab.dart';
@@ -25,7 +23,6 @@ class ContactListPage extends StatefulWidget {
 class _ContactListPageState extends State<ContactListPage>
     with TickerProviderStateMixin {
   ContactsBloc contactsBloc;
-  UserDataRepository userDataRepository;
   ScrollController scrollController;
   final TextEditingController usernameController = TextEditingController();
   List<Contact> contacts;
@@ -35,8 +32,7 @@ class _ContactListPageState extends State<ContactListPage>
   @override
   void initState() {
     contacts = List();
-    userDataRepository = UserDataRepository();
-    contactsBloc = ContactsBloc(userDataRepository: userDataRepository);
+    contactsBloc = BlocProvider.of<ContactsBloc>(context);
     scrollController = ScrollController();
     scrollController.addListener(scrollListener);
     animationController = AnimationController(
@@ -100,36 +96,36 @@ class _ContactListPageState extends State<ContactListPage>
                         ),
                         BlocBuilder<ContactsBloc, ContactsState>(
                             builder: (context, state) {
-                              print(state);
-                              if (state is FetchingContactsState) {
-                                return SliverToBoxAdapter(
-                                  child: Container(
-                                      margin: EdgeInsets.only(top: 20),
-                                      child: Center(
-                                          child: CircularProgressIndicator())),
-                                );
-                              }
+                          print(state);
+                          if (state is FetchingContactsState) {
+                            return SliverToBoxAdapter(
+                              child: Container(
+                                  margin: EdgeInsets.only(top: 20),
+                                  child: Center(
+                                      child: CircularProgressIndicator())),
+                            );
+                          }
 
-                              if (state is FetchedContactsState)
-                                contacts = state.contacts;
+                          if (state is FetchedContactsState)
+                            contacts = state.contacts;
 
-                              return SliverList(
-                                delegate:
+                          return SliverList(
+                            delegate:
                                 SliverChildBuilderDelegate((context, index) {
-                                  return ContactRowWidget(contact: contacts[index]);
-                                }, childCount: contacts.length),
-                              );
-                            })
+                              return ContactRowWidget(contact: contacts[index]);
+                            }, childCount: contacts.length),
+                          );
+                        })
                       ]),
                   Container(
                     margin: EdgeInsets.only(top: 190),
                     child: BlocBuilder<ContactsBloc, ContactsState>(
                         builder: (context, state) {
-                          return QuickScrollBar(
-                            nameList: contacts,
-                            scrollController: scrollController,
-                          );
-                        }),
+                      return QuickScrollBar(
+                        nameList: contacts,
+                        scrollController: scrollController,
+                      );
+                    }),
                   ),
                 ],
               ),
@@ -159,65 +155,65 @@ class _ContactListPageState extends State<ContactListPage>
         context: context,
         builder: (BuildContext bc) {
           return BlocBuilder<ContactsBloc, ContactsState>(
-              builder: (context,state){
-                return Container(
-                  color: Color(0xFF737373),
-                  // This line set the transparent background
-                  child: Container(
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(40.0),
-                              topRight: Radius.circular(40.0))),
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Padding(
-                                padding: EdgeInsets.only(left: 20, right: 20),
-                                child: Image.asset(Assets.social)),
-                            Container(
-                              margin: EdgeInsets.only(top: 40),
-                              child: Text(
-                                'Add by Username',
-                                style: Styles.textHeading,
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.fromLTRB(50, 20, 50, 20),
-                              child: TextField(
-                                controller: usernameController,
-                                textAlign: TextAlign.center,
-                                style: Styles.subHeading,
-                                decoration: Decorations.getInputDecoration(
-                                    hint: '@username', isPrimary: true),
-                              ),
-                            ),
-                            Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: <Widget>[
-                                Container(
-                                  child: BlocBuilder<ContactsBloc, ContactsState>(
-                                      builder: (context, state) {
-                                        return GradientFab(
-                                          elevation: 0.0,
-                                          child: getButtonChild(state),
-                                          onPressed: () {
-                                            contactsBloc.add(AddContactEvent(
-                                                username: usernameController.text));
-                                          },
-                                        );
-                                      }),
-                                ),
-                              ],
-                            )
-                          ],
+              builder: (context, state) {
+            return Container(
+              color: Color(0xFF737373),
+              // This line set the transparent background
+              child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(40.0),
+                          topRight: Radius.circular(40.0))),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Padding(
+                            padding: EdgeInsets.only(left: 20, right: 20),
+                            child: Image.asset(Assets.social)),
+                        Container(
+                          margin: EdgeInsets.only(top: 40),
+                          child: Text(
+                            'Add by Username',
+                            style: Styles.textHeading,
+                          ),
                         ),
-                      )),
-                );
-              });
+                        Container(
+                          margin: EdgeInsets.fromLTRB(50, 20, 50, 20),
+                          child: TextField(
+                            controller: usernameController,
+                            textAlign: TextAlign.center,
+                            style: Styles.subHeading,
+                            decoration: Decorations.getInputDecoration(
+                                hint: '@username', isPrimary: true),
+                          ),
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                            Container(
+                              child: BlocBuilder<ContactsBloc, ContactsState>(
+                                  builder: (context, state) {
+                                return GradientFab(
+                                  elevation: 0.0,
+                                  child: getButtonChild(state),
+                                  onPressed: () {
+                                    contactsBloc.add(AddContactEvent(
+                                        username: usernameController.text));
+                                  },
+                                );
+                              }),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  )),
+            );
+          });
         });
   }
 
@@ -237,7 +233,6 @@ class _ContactListPageState extends State<ContactListPage>
       return Icon(Icons.done, color: Palette.primaryColor);
     }
   }
-
 
   @override
   void dispose() {
