@@ -38,7 +38,7 @@ class AddContactSuccessState extends ContactsState {
 }
 
 class AddContactFailedState extends ContactsState {
-  final MessioException exception;
+  final KopperException exception;
   AddContactFailedState(this.exception);
   @override
   String toString() => 'AddContactFailedState';
@@ -50,7 +50,7 @@ class ClickedContactState extends ContactsState {
 }
 
 class ErrorState extends ContactsState {
-  final MessioException exception;
+  final KopperException exception;
   ErrorState(this.exception);
   @override
   String toString() => 'ErrorState';

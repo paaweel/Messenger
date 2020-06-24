@@ -17,7 +17,7 @@ class UserDataProvider extends BaseUserDataProvider {
 
   @override
   Future<User> saveDetails(User user) async {
-    return User(); // create a user object and return
+    return User();
   }
 
   @override
@@ -36,7 +36,7 @@ class UserDataProvider extends BaseUserDataProvider {
     List<Contact> contactList = List();
 
     final response = await Requests.get(
-      Urls.getContacts(1),
+      Urls.getContacts(SharedObjects.userId),
       headers: {HttpHeaders.authorizationHeader: Urls.getToken()},
     );
     var json = response.json();
@@ -48,22 +48,20 @@ class UserDataProvider extends BaseUserDataProvider {
 
   @override
   Future<void> addContact(String username) async {
-    await getUser(username);
-    //create a node with the username provided in the contacts collection
-    DocumentReference ref = fireStoreDb
-        .collection(Paths.usersPath)
-        .document(SharedObjects.prefs.get(Constants.sessionId));
-    //await to fetch user details of the username provided and set data
-    var documentSnapshot = await ref.get();
-    print(documentSnapshot.data);
-    List<String> contacts = documentSnapshot.data['contacts'] != null
-        ? List.from(documentSnapshot.data['contacts'])
-        : List();
-    if (contacts.contains(username)) {
+    List<Contact> contactsList = await getContacts();
+    
+    if ((contactsList.firstWhere((contact) => contact.username == username,
+            orElse: () => null)) != null) {
       throw ContactAlreadyExistsException();
     }
-    contacts.add(username);
-    ref.updateData({'contacts': contacts});
+
+    final response = await Requests.post(
+      Urls.getContacts(SharedObjects.userId),
+      body: username,
+      bodyEncoding: RequestBodyEncoding.JSON,
+      headers: {HttpHeaders.authorizationHeader: Urls.getToken()},
+    );
+    print(response.hasError);
   }
 
   @override

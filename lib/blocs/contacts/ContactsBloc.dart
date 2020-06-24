@@ -37,7 +37,7 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
       yield FetchingContactsState();
       List<Contact> contacts = await userDataRepository.getContacts();
       yield FetchedContactsState(contacts);
-    } on MessioException catch(exception){
+    } on KopperException catch(exception){
       print(exception.errorMessage());
       yield ErrorState(exception);
     }
@@ -47,8 +47,9 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     try {
       yield AddContactProgressState();
       await userDataRepository.addContact(username);
+      add(FetchContactsEvent());
       yield AddContactSuccessState();
-    } on MessioException catch(exception){
+    } on KopperException catch(exception){
       print(exception.errorMessage());
       yield AddContactFailedState(exception);
     }
