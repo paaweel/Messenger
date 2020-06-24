@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kopper/config/Paths.dart';
+import 'package:kopper/config/Urls.dart';
 // import 'package:kopper/config/Urls.dart';
 import 'package:kopper/utils/SharedObjects.dart';
 import 'package:kopper/models/User.dart';
@@ -7,36 +10,39 @@ import 'package:kopper/models/Contact.dart';
 import 'package:kopper/providers/BaseProvider.dart';
 import 'package:kopper/utils/Exceptions.dart';
 import 'package:kopper/config/Constants.dart';
-// import 'package:requests/requests.dart';
+import 'package:requests/requests.dart';
 
 class UserDataProvider extends BaseUserDataProvider {
   final fireStoreDb = Firestore.instance;
 
   @override
   Future<User> saveDetails(User user) async {
-
     return User(); // create a user object and return
   }
 
   @override
   Future<User> saveProfileDetails(
       String username, String profileImageUrl) async {
-
     return User(); // create a user object and return it
   }
 
   @override
   Future<bool> isProfileComplete() async {
-
     return true;
   }
 
   @override
   Future<List<Contact>> getContacts() async {
-    // final response = await Requests.get(Urls.getContacts());
-
     List<Contact> contactList = List();
 
+    final response = await Requests.get(
+      Urls.getContacts(1),
+      headers: {HttpHeaders.authorizationHeader: Urls.getToken()},
+    );
+    var json = response.json();
+    json.forEach((contactJson) {
+      contactList.add(Contact.fromJson(contactJson));
+    });
     return contactList;
   }
 
@@ -64,8 +70,7 @@ class UserDataProvider extends BaseUserDataProvider {
   Future<User> getUser(String username) async {
     String uid = await getUidByUsername(username);
 
-
-    if (uid  == "-1") {
+    if (uid == "-1") {
       return User();
     } else {
       throw UserNotFoundException();

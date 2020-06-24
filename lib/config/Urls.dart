@@ -16,4 +16,9 @@ class Urls {
   static String postContacts(int userId) {
     return address + "users/" + userId.toString() + "/" + "contacts";
   }
+
+  // authorization
+  static const authenticationPrefix = "Bearer ";
+  static String token = "";
+  static String getToken() => authenticationPrefix + token;
 }

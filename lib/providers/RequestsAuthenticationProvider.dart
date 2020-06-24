@@ -26,9 +26,8 @@ class RequestsAuthenticationProvider extends BaseAuthenticationProvider {
     );
     print(response.json());
     dynamic json = response.json();
-    return !response.success
-        ? null
-        : currentUser = User.fromJson(json);
+    Urls.token = response.success ? json['token'] : "";
+    return !response.success ? null : currentUser = User.fromJson(json);
   }
 
   @override
@@ -38,20 +37,32 @@ class RequestsAuthenticationProvider extends BaseAuthenticationProvider {
 
   @override
   Future<bool> isLoggedIn() async {
-    return getCurrentUser() != null;
+    if (getCurrentUser() == null) {
+      return false;
+    } else if (Urls.token == "") {
+      currentUser = currentUser.token == ""
+          ? await logIn(currentUser.username, currentUser.password)
+          : currentUser.token;
+      Urls.token = currentUser.token;
+    }
+    return true;
   }
 
   @override
   Future<User> getCurrentUser() async {
-    return currentUser != null ? 
-          currentUser
-          : await secureStorage.read(key: "firstname") != null? 
-          currentUser = User(
-            firstName: await secureStorage.read(key: "firstname"),
-            lastName: await secureStorage.read(key: "lastname"),
-            username: await secureStorage.read(key: "username"),
-            password: await secureStorage.read(key: "password"))
+    return currentUser != null
+        ? currentUser
+        : await secureStorage.read(key: "username") != null
+            ? currentUser = await readCurrentUser()
             : null;
+  }
+
+  Future<User> readCurrentUser() async {
+    return User(
+        firstName: await secureStorage.read(key: "firstname"),
+        lastName: await secureStorage.read(key: "lastname"),
+        username: await secureStorage.read(key: "username"),
+        password: await secureStorage.read(key: "password"));
   }
 
   @override
