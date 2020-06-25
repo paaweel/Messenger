@@ -35,6 +35,8 @@ dependencies:
   firebase_storage: ^3.0.6    # storage for storing image files
   requests: ^3.3.0    # storage for storing image files
   flutter_secure_storage: ^3.3.3 # safe storage for sensitive data
+  file_picker: ^1.12.0          #
+  disposables: ^0.1.2           # 
 
 
   # The following adds the Cupertino Icons font to your application.

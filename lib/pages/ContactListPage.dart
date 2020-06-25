@@ -12,6 +12,8 @@ import 'package:kopper/widgets/BottomSheetFixed.dart';
 import 'package:kopper/widgets/ContactRowWidget.dart';
 import 'package:kopper/widgets/GradientFab.dart';
 import 'package:kopper/widgets/QuickScrollBar.dart';
+import 'package:kopper/pages/ConversationPageSlide.dart';
+import 'package:kopper/config/Transitions.dart';
 
 class ContactListPage extends StatefulWidget {
   @override
@@ -76,6 +78,8 @@ class _ContactListPageState extends State<ContactListPage>
                       behavior: SnackBarBehavior.floating,
                       content: Text(state.exception.errorMessage()));
                   Scaffold.of(bc).showSnackBar(snackBar);
+                } else if (state is ClickedContactState){
+                  Navigator.push(context,SlideLeftRoute(page: ConversationPageSlide(startContact: state.contact)));
                 }
               },
               child: Stack(

@@ -45,6 +45,9 @@ class AddContactFailedState extends ContactsState {
 }
 
 class ClickedContactState extends ContactsState {
+  final Contact contact;
+  ClickedContactState(this.contact):super([contact]);
+  
   @override
   String toString() => 'ClickedContactState';
 }

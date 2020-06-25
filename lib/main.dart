@@ -7,7 +7,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopper/repositories/AuthenticationRepository.dart';
 import 'package:kopper/repositories/StorageRepository.dart';
 import 'package:kopper/repositories/UserDataRepository.dart';
+import 'package:kopper/repositories/ChatRepository.dart';
 import 'package:kopper/blocs/authentication/AuthenticationBloc.dart';
+import 'package:kopper/blocs/chat/ChatBloc.dart';
 import 'package:kopper/utils/SharedObjects.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,6 +19,7 @@ void main() async {
   final AuthenticationRepository authRepository = AuthenticationRepository();
   final UserDataRepository userDataRepository = UserDataRepository();
   final StorageRepository storageRepository = StorageRepository();
+  final ChatRepository chatRepository = ChatRepository();
   SharedObjects.prefs = await SharedPreferences.getInstance();
   runApp(MultiBlocProvider(
     providers: [
@@ -31,6 +34,13 @@ void main() async {
         create: (context) => ContactsBloc(
           userDataRepository: userDataRepository,
         ),
+      ),
+      BlocProvider<ChatBloc>(
+          create: (context) => ChatBloc(
+            userDataRepository: userDataRepository,
+            storageRepository:  storageRepository,
+            chatRepository:chatRepository
+          ),
       )
     ],
     child: Kopper(),

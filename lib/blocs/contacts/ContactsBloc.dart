@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:kopper/models/Contact.dart';
 import 'package:kopper/repositories/UserDataRepository.dart';
 import 'package:kopper/utils/Exceptions.dart';
+import 'package:kopper/models/User.dart';
+import 'package:kopper/repositories/ChatRepository.dart';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -12,9 +14,12 @@ part 'ContactsStates.dart';
 
 class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
   UserDataRepository userDataRepository;
-
-  ContactsBloc({this.userDataRepository}) : assert(userDataRepository != null);
-
+  ChatRepository chatRepository;
+  
+  ContactsBloc({this.userDataRepository, this.chatRepository})
+      : assert(userDataRepository != null),
+        assert(chatRepository != null);
+        
   @override
   ContactsState get initialState => InitialContactsState();
 
@@ -27,7 +32,7 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     } else if (event is AddContactEvent) {
       yield* mapAddContactEventToState(event.username);
     } else if (event is ClickedContactEvent) {
-      yield* mapClickedContactEventToState();
+      yield ClickedContactState(event.contact);
     }
 
   }
@@ -53,9 +58,5 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
       print(exception.errorMessage());
       yield AddContactFailedState(exception);
     }
-  }
-
-  Stream<ContactsState> mapClickedContactEventToState() async* {
-    //TODO: Redirect to chat screen
   }
 }

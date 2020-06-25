@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:kopper/config/Palette.dart';
 import 'package:kopper/pages/ConversationBottomSheet.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kopper/blocs/chat/ChatBloc.dart';
 
 class InputWidget extends StatelessWidget {
-
-  final TextEditingController textEditingController = new TextEditingController();
+  final TextEditingController textEditingController =
+      new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -14,20 +16,18 @@ class InputWidget extends StatelessWidget {
         child: Row(
           children: <Widget>[
             Material(
-              child: new Container(
-                margin: new EdgeInsets.symmetric(horizontal: 1.0),
-                child: new IconButton(
-                  icon: new Icon(Icons.face),
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 1.0),
+                child: IconButton(
+                  icon: Icon(Icons.face),
                   color: Palette.accentColor,
                   onPressed: () => {
                     showModalBottomSheet(
                         context: context,
                         builder: (BuildContext bc) {
                           return Container(
-                            child: new Wrap(
-                              children: <Widget>[
-                                ConversationBottomSheet()
-                              ],
+                            child: Wrap(
+                              children: <Widget>[ConversationBottomSheet()],
                             ),
                           );
                         })
@@ -42,7 +42,8 @@ class InputWidget extends StatelessWidget {
               child: Material(
                 child: Container(
                   child: TextField(
-                    style: TextStyle(color: Palette.primaryTextColor, fontSize: 15.0),
+                    style: TextStyle(
+                        color: Palette.primaryTextColor, fontSize: 15.0),
                     controller: textEditingController,
                     decoration: InputDecoration.collapsed(
                       hintText: 'Type a message',
@@ -55,11 +56,11 @@ class InputWidget extends StatelessWidget {
 
             // Send Message Button
             Material(
-              child: new Container(
-                margin: new EdgeInsets.symmetric(horizontal: 8.0),
-                child: new IconButton(
-                  icon: new Icon(Icons.send),
-                  onPressed: () => {},
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 8.0),
+                child: IconButton(
+                  icon: Icon(Icons.send),
+                  onPressed: () => sendMessage(context),
                   color: Palette.accentColor,
                 ),
               ),
@@ -69,11 +70,17 @@ class InputWidget extends StatelessWidget {
         ),
         width: double.infinity,
         height: 50.0,
-        decoration: new BoxDecoration(
-            border: new Border(
-                top: new BorderSide(color: Palette.greyColor, width: 0.5)),
+        decoration: BoxDecoration(
+            border:
+                Border(top: BorderSide(color: Palette.greyColor, width: 0.5)),
             color: Colors.white),
       ),
     );
+  }
+
+  void sendMessage(context) {
+    BlocProvider.of<ChatBloc>(context)
+        .add(SendTextMessageEvent(textEditingController.text));
+    textEditingController.clear();
   }
 }
