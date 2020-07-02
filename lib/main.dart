@@ -33,13 +33,14 @@ void main() async {
       BlocProvider<ContactsBloc>(
         create: (context) => ContactsBloc(
           userDataRepository: userDataRepository,
+          chatRepository: chatRepository,
         ),
       ),
       BlocProvider<ChatBloc>(
           create: (context) => ChatBloc(
             userDataRepository: userDataRepository,
             storageRepository:  storageRepository,
-            chatRepository:chatRepository
+            chatRepository:     chatRepository
           ),
       )
     ],

@@ -33,10 +33,11 @@ dependencies:
   cloud_firestore: ^0.12.9+1  # firebase db
   image_picker: ^0.6.1+4      # image picker for gallery
   firebase_storage: ^3.0.6    # storage for storing image files
-  requests: ^3.3.0    # storage for storing image files
+  requests: ^3.3.0            # http requests
   flutter_secure_storage: ^3.3.3 # safe storage for sensitive data
   file_picker: ^1.12.0          #
-  disposables: ^0.1.2           # 
+  dart_amqp: ^0.1.4
+
 
 
   # The following adds the Cupertino Icons font to your application.

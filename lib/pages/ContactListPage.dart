@@ -78,8 +78,12 @@ class _ContactListPageState extends State<ContactListPage>
                       behavior: SnackBarBehavior.floating,
                       content: Text(state.exception.errorMessage()));
                   Scaffold.of(bc).showSnackBar(snackBar);
-                } else if (state is ClickedContactState){
-                  Navigator.push(context,SlideLeftRoute(page: ConversationPageSlide(startContact: state.contact)));
+                } else if (state is ClickedContactState) {
+                  Navigator.push(
+                      context,
+                      SlideLeftRoute(
+                          page: ConversationPageSlide(
+                              startContact: state.contact)));
                 }
               },
               child: Stack(

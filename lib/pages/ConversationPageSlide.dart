@@ -4,6 +4,9 @@ import 'ConversationPage.dart';
 import 'package:kopper/widgets/InputWidget.dart';
 import 'package:kopper/pages/ConversationBottomSheet.dart';
 import 'package:kopper/models/Contact.dart';
+import 'package:kopper/blocs/chat/ChatBloc.dart';
+import 'package:kopper/models/Chat.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ConversationPageSlide extends StatefulWidget {
   @override
@@ -17,13 +20,18 @@ class ConversationPageSlide extends StatefulWidget {
 class _ConversationPageSlideState extends State<ConversationPageSlide>
     with SingleTickerProviderStateMixin {
   var controller;
+  PageController pageController = PageController();
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final Contact startContact;
+  ChatBloc chatBloc;
+  List<Chat> chatList = List();
+  bool isFirstLaunch = true;
 
   _ConversationPageSlideState(this.startContact);
 
   @override
   void initState() {
+    chatBloc = BlocProvider.of<ChatBloc>(context);
     controller = RubberAnimationController(
       vsync: this,
     );
@@ -37,11 +45,35 @@ class _ConversationPageSlideState extends State<ConversationPageSlide>
             key: _scaffoldKey,
             body: Column(
               children: <Widget>[
-                Expanded(child: PageView.builder(
-                    itemCount: 500,
-                    itemBuilder: (index, context) {
-                  return ConversationPage();
-                })),
+                BlocListener<ChatBloc, ChatState>(
+                    bloc: chatBloc,
+                    listener: (bc, state) {
+                      print('ChatList $chatList');
+                      if (isFirstLaunch && chatList.isNotEmpty) {
+                        isFirstLaunch = false;
+                        for (int i = 0; i < chatList.length; i++) {
+                          if (startContact.username == chatList[i].username) {
+                            BlocProvider.of<ChatBloc>(context)
+                                .add(PageChangedEvent(i, chatList[i]));
+                            pageController.jumpToPage(i);
+                          }
+                        }
+                      }
+                    },
+                    child: Expanded(child: BlocBuilder<ChatBloc, ChatState>(
+                      builder: (context, state) {
+                        if (state is FetchedChatListState)
+                          chatList = state.chatList;
+                        return PageView.builder(
+                            controller: pageController,
+                            itemCount: chatList.length,
+                            onPageChanged: (index) =>
+                                BlocProvider.of<ChatBloc>(context).add(
+                                    PageChangedEvent(index, chatList[index])),
+                            itemBuilder: (bc, index) =>
+                                ConversationPage(chatList[index]));
+                      },
+                    ))),
                 Container(
                     child: GestureDetector(
                         child: InputWidget(),

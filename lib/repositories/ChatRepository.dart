@@ -6,6 +6,7 @@ import 'package:kopper/models/User.dart';
 
 class ChatRepository{
   BaseChatProvider chatProvider = ChatProvider();
+  
   Stream<List<Chat>> getChats() => chatProvider.getChats();
   Stream<List<Message>> getMessages(String chatId) => chatProvider.getMessages(chatId);
   Future<void> sendMessage(String chatId, Message message) => chatProvider.sendMessage(chatId, message);
