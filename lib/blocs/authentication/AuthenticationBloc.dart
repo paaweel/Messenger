@@ -71,7 +71,7 @@ class AuthenticationBloc
     }
   }
 
-  Stream<AuthenticationState> mapClickedGoogleLoginToState(User user) async* {
+  Stream<AuthenticationState> mapClickedRegisterToState(User user) async* {
     yield AuthInProgress();  //show progress bar
     try {
       User authenticatedUser =
@@ -99,6 +99,7 @@ class AuthenticationBloc
         yield UnAuthenticated();
       else {
         yield Authenticated(authenticatedUser);
+        yield ProfileUpdated();
         add(LoggedIn(authenticatedUser));
       }
 

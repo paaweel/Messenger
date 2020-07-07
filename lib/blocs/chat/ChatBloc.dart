@@ -63,7 +63,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       yield FetchedMessagesState(event.messages);
     }
     if (event is SendTextMessageEvent) {
-            Message message = TextMessage(
+      Message message = TextMessage(
           event.message,
           DateTime.now().millisecondsSinceEpoch,
           SharedObjects.prefs.getString(Constants.sessionName),
@@ -75,7 +75,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     // }
   }
 
- Stream<ChatState> mapFetchChatListEventToState(
+  Stream<ChatState> mapFetchChatListEventToState(
       FetchChatListEvent event) async* {
     try {
       chatsSubscription?.cancel();
@@ -104,7 +104,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
-    Stream<ChatState> mapFetchConversationDetailsEventToState(
+  Stream<ChatState> mapFetchConversationDetailsEventToState(
       FetchConversationDetailsEvent event) async* {
     User user = await userDataRepository.getUser(event.chat.username);
     print(user);
@@ -124,7 +124,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   @override
   Future<void> close() {
     messagesSubscription.cancel();
-    
+
     return super.close();
   }
 }

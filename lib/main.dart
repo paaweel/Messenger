@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopper/blocs/contacts/ContactsBloc.dart';
 import 'package:kopper/pages/ContactListPage.dart';
 import 'config/Palette.dart';
 import 'pages/RegisterPage.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopper/repositories/AuthenticationRepository.dart';
 import 'package:kopper/repositories/StorageRepository.dart';
 import 'package:kopper/repositories/UserDataRepository.dart';
@@ -37,11 +37,10 @@ void main() async {
         ),
       ),
       BlocProvider<ChatBloc>(
-          create: (context) => ChatBloc(
+        create: (context) => ChatBloc(
             userDataRepository: userDataRepository,
-            storageRepository:  storageRepository,
-            chatRepository:     chatRepository
-          ),
+            storageRepository: storageRepository,
+            chatRepository: chatRepository),
       )
     ],
     child: Kopper(),
@@ -64,6 +63,7 @@ class Kopper extends StatelessWidget {
           if (state is UnAuthenticated) {
             return RegisterPage();
           } else if (state is ProfileUpdated) {
+            BlocProvider.of<ChatBloc>(context).add(FetchChatListEvent());
             return ContactListPage();
           } else {
             return RegisterPage();

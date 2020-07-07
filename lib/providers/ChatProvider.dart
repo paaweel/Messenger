@@ -13,8 +13,9 @@ import 'BaseProvider.dart';
 
 class ChatProvider extends BaseChatProvider {
   Client _client;
+  List<Chat> chats;
 
-  ChatProvider({Firestore fireStoreDb});
+  ChatProvider();
 
   @override
   Stream<List<Chat>> getChats() {

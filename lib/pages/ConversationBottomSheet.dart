@@ -20,23 +20,23 @@ class _ConversationBottomSheetState extends State<ConversationBottomSheet> {
             backgroundColor: Colors.white,
             body: ListView(children: <Widget>[
               GestureDetector(
-                  child: ListView(
-                    shrinkWrap: true,
-                    physics: ClampingScrollPhysics(),
-                    children: <Widget>[
-                      NavigationPillWidget(),
-                      Center(child: Text('Messages', style: Styles.textHeading)),
-                      SizedBox(
-                        height: 20,
-                      ),
-                    ],
-                  ),
-                  onVerticalDragEnd: (details) {
-                    print("onVerticalDragEnd");
-                    if (details.primaryVelocity > 60) {
-                      Navigator.pop(context);
-                    }
-                  },
+                child: ListView(
+                  shrinkWrap: true,
+                  physics: ClampingScrollPhysics(),
+                  children: <Widget>[
+                    NavigationPillWidget(),
+                    Center(child: Text('Messages', style: Styles.textHeading)),
+                    SizedBox(
+                      height: 20,
+                    ),
+                  ],
+                ),
+                onVerticalDragEnd: (details) {
+                  print("onVerticalDragEnd");
+                  if (details.primaryVelocity > 60) {
+                    Navigator.pop(context);
+                  }
+                },
               ),
               ListView.separated(
                 shrinkWrap: true,

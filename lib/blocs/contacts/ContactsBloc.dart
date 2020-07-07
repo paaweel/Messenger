@@ -34,7 +34,6 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     } else if (event is ClickedContactEvent) {
       yield ClickedContactState(event.contact);
     }
-
   }
 
   Stream<ContactsState> mapFetchContactsEventToState() async* {
@@ -52,6 +51,8 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     try {
       yield AddContactProgressState();
       await userDataRepository.addContact(username);
+      User user = await userDataRepository.getUser(username);
+      await chatRepository.createChatIdForContact(user);
       add(FetchContactsEvent());
       yield AddContactSuccessState();
     } on KopperException catch(exception){

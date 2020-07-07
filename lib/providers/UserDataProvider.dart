@@ -39,6 +39,7 @@ class UserDataProvider extends BaseUserDataProvider {
       Urls.getContacts(SharedObjects.userId),
       headers: {HttpHeaders.authorizationHeader: Urls.getToken()},
     );
+
     var json = response.json();
     json.forEach((contactJson) {
       contactList.add(Contact.fromJson(contactJson));
@@ -49,10 +50,16 @@ class UserDataProvider extends BaseUserDataProvider {
   @override
   Future<void> addContact(String username) async {
     List<Contact> contactsList = await getContacts();
-    
-    if ((contactsList.firstWhere((contact) => contact.username == username,
-            orElse: () => null)) != null) {
-      throw ContactAlreadyExistsException();
+
+    try {
+      if ((contactsList.firstWhere((contact) => contact.username == username,
+              orElse: () => null)) !=
+          null) {
+        throw ContactAlreadyExistsException();
+      }
+    } catch (_, stacktrace) {
+      print(stacktrace);
+      return;
     }
 
     final response = await Requests.post(
@@ -66,13 +73,17 @@ class UserDataProvider extends BaseUserDataProvider {
 
   @override
   Future<User> getUser(String username) async {
-    String uid = await getUidByUsername(username);
+    final response = await Requests.get(Urls.getUsers
+        // headers: {HttpHeaders.authorizationHeader: Urls.getToken()},
+        );
 
-    if (uid == "-1") {
-      return User();
-    } else {
-      throw UserNotFoundException();
-    }
+    var json = response.json();
+    User match;
+    json.forEach((user) {
+      if (user["username"] == username) match = User.fromJson(user);
+    });
+
+    return match;
   }
 
   @override
