@@ -21,7 +21,7 @@ class RequestsAuthenticationProvider extends BaseAuthenticationProvider {
   @override
   Future<User> logIn(String username, String password) async {
     _currentUser = null;
-
+  
     final response = await Requests.post(
       Urls.login,
       body: {"username": username, "password": password},

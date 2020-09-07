@@ -1,8 +1,10 @@
 import 'dart:async';
+// import 'dart:html';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kopper/config/Constants.dart';
 import 'package:kopper/config/Paths.dart';
+import 'package:kopper/config/Urls.dart';
 import 'package:kopper/models/Chat.dart';
 import 'package:kopper/models/Message.dart';
 import 'package:kopper/models/User.dart';
@@ -13,35 +15,38 @@ import 'BaseProvider.dart';
 
 class ChatProvider extends BaseChatProvider {
   Client _client;
-  List<Chat> chats;
 
-  ChatProvider();
+  List<Chat> _chats = List<Chat>();
 
-  @override
-  Stream<List<Chat>> getChats() {
-    return Stream.empty();
-    // String uId = SharedObjects.prefs.getString(Constants.sessionUid);
-    // return fireStoreDb
-    //     .collection(Paths.usersPath)
-    //     .document(uId)
-    //     .snapshots()
-    //     .transform(StreamTransformer<DocumentSnapshot, List<Chat>>.fromHandlers(
-    //         handleData: (DocumentSnapshot documentSnapshot,
-    //                 EventSink<List<Chat>> sink) =>
-    //             mapDocumentToChat(documentSnapshot, sink)));
+  StreamController _chatsController;
+
+  static int id = 0;
+
+  ChatProvider() {
+    ConnectionSettings settings =
+        ConnectionSettings(
+          host: Urls.host,
+          port: 52376,
+          authProvider: PlainAuthenticator(Constants.user, Constants.password),
+          virtualHost: Constants.hostName,
+
+          );
+    _client = Client(settings: settings);
+    // _client.channel()
+    //   .then((Channel channel) => channel.exchange(Constants.incomingConvExchange, ExchangeType.TOPIC, durable: true))
+    //   .then((Exchange exchange) => exchange.bindQueueConsumer(Constants.mainQueue));
+    createChatsStream();
   }
 
-  // void mapDocumentToChat(
-  //   DocumentSnapshot documentSnapshot, EventSink sink) async {
-  // List<Chat> chats = List();
-  // Map data = documentSnapshot.data['chats'];
-  // if(data!=null){
-  // data.forEach((key, value) => chats.add(Chat(key, value)));
-  // sink.add(chats);
-  // }
-  // }
+  void createChatsStream() {
+    _chatsController = StreamController<List<Chat>>();
+    _chatsController.sink.add(_chats);
+  }
 
-  Stream<List<Message>> getMessages(String chatId) {
+  @override
+  Stream<List<Chat>> getChats() => _chatsController.stream;
+
+  Stream<List<Message>> getMessages(int chatId) {
     // DocumentReference chatDocRef =
     //     fireStoreDb.collection(Paths.chatsPath).document(chatId);
     // CollectionReference messagesCollection =
@@ -55,21 +60,19 @@ class ChatProvider extends BaseChatProvider {
     //                 mapDocumentToMessage(querySnapshot, sink)));
     return Stream.empty();
   }
-
-  void mapDocumentToMessage(QuerySnapshot querySnapshot, EventSink sink) async {
-    // List<Message> messages = List();
-
-    // for (DocumentSnapshot document in querySnapshot.documents) {
-    //   messages.add(Message.fromFireStore(document));
-    // }
-    // sink.add(messages);
-  }
-
+  
   @override
-  Future<void> sendMessage(String chatId, Message message) async {
+  Future<void> sendMessage(int chatId, Message message) async {
     print("Sending message to ");
     print(chatId);
     print(message.toString());
+    _client.channel()
+      .then((Channel channel) => channel.exchange(Constants.outgoingConvExchange, ExchangeType.FANOUT, durable: true)
+      .then((Exchange exchange) {
+        exchange.publish("Testing 1-2-3", null);
+        return _client.close();
+      })
+    );
     // DocumentReference chatDocRef =
     //     fireStoreDb.collection(Paths.chatsPath).document(chatId);
     // CollectionReference messagesCollection =
@@ -79,7 +82,8 @@ class ChatProvider extends BaseChatProvider {
   }
 
   @override
-  Future<String> getChatIdByUsername(String username) async {
+  Future<int> getChatIdByUsername(String username) async {
+    
     // String uId = SharedObjects.prefs.getString(Constants.sessionUid);
     // String selfUsername =
     //     SharedObjects.prefs.getString(Constants.sessionUsername);
@@ -93,11 +97,23 @@ class ChatProvider extends BaseChatProvider {
     //     'chats': {username: chatId}
     //   });
     // }
-    return "1";
+
+    Chat chat = _chats.firstWhere((chat) => chat.username == username, orElse: () => null);
+    if (chat != null) {
+      return chat.chatId;
+    }
+    else {
+      createChatIdForContact(username);
+      return id - 1;
+    }
   }
 
   @override
-  Future<void> createChatIdForContact(User user) async {
+  Future<void> createChatIdForContact(String username) async {
+    Chat chat = Chat(username, id);
+    id = id + 1;
+    _chats.add(chat);
+    _chatsController.sink.add(_chats);
     // String contactUid = user.documentId;
     // String contactUsername = user.username;
     // String uId = SharedObjects.prefs.getString(Constants.sessionUid);
@@ -116,14 +132,4 @@ class ChatProvider extends BaseChatProvider {
     // },merge: true);
     // }
   }
-
-  // Future<String> createChatIdForUsers(
-  //     String selfUsername, String contactUsername) async {
-  //   CollectionReference collectionReference =
-  //       fireStoreDb.collection(Paths.chatsPath);
-  //   DocumentReference documentReference = await collectionReference.add({
-  //     'members': [selfUsername, contactUsername]
-  //   });
-  //   return documentReference.documentID;
-  // }
 }

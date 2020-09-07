@@ -26,7 +26,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   StreamSubscription messagesSubscription;
   StreamSubscription chatsSubscription;
-  String activeChatId;
+  int activeChatId;
 
   ChatBloc(
       {this.chatRepository, this.userDataRepository, this.storageRepository})
@@ -70,9 +70,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           SharedObjects.prefs.getString(Constants.sessionUsername));
       await chatRepository.sendMessage(activeChatId, message);
     }
-    // if (event is SendAttachmentEvent) {
-    //   await mapPickedAttachmentEventToState(event);
-    // }
   }
 
   Stream<ChatState> mapFetchChatListEventToState(
@@ -92,7 +89,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       FetchMessagesEvent event) async* {
     try {
       yield InitialChatState();
-      String chatId =
+      int chatId =
           await chatRepository.getChatIdByUsername(event.chat.username);
       messagesSubscription?.cancel();
       messagesSubscription = chatRepository
@@ -110,17 +107,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     print(user);
     yield FetchedContactDetailsState(user);
   }
-
-  // Future mapPickedAttachmentEventToState(SendAttachmentEvent  event) async {
-  //   String url = await storageRepository.uploadFile(
-  //       event.file, Paths.imageAttachmentsPath);
-  //   String username = SharedObjects.prefs.getString(Constants.sessionUsername);
-  //   String name = SharedObjects.prefs.getString(Constants.sessionName);
-  //   Message message = VideoMessage(
-  //       url, DateTime.now().millisecondsSinceEpoch, name, username);
-  //   await chatRepository.sendMessage(event.chatId, message);
-  // }
-
+  
   @override
   Future<void> close() {
     messagesSubscription.cancel();

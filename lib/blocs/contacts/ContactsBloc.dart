@@ -40,6 +40,7 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     try {
       yield FetchingContactsState();
       List<Contact> contacts = await userDataRepository.getContacts();
+      contacts.forEach((contact) async { await chatRepository.createChatIdForContact(contact.username); });
       yield FetchedContactsState(contacts);
     } on KopperException catch(exception){
       print(exception.errorMessage());
@@ -51,8 +52,7 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     try {
       yield AddContactProgressState();
       await userDataRepository.addContact(username);
-      User user = await userDataRepository.getUser(username);
-      await chatRepository.createChatIdForContact(user);
+      await chatRepository.createChatIdForContact(username);
       add(FetchContactsEvent());
       yield AddContactSuccessState();
     } on KopperException catch(exception){

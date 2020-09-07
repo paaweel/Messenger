@@ -30,9 +30,9 @@ abstract class BaseStorageProvider {
 }
 
 abstract class BaseChatProvider {
-  Stream<List<Message>> getMessages(String chatId);
+  Stream<List<Message>> getMessages(int chatId);
   Stream<List<Chat>> getChats();
-  Future<void> sendMessage(String chatId, Message message);
-  Future<String> getChatIdByUsername(String username);
-  Future<void> createChatIdForContact(User user);
+  Future<void> sendMessage(int chatId, Message message);
+  Future<int> getChatIdByUsername(String username);
+  Future<void> createChatIdForContact(String username);
 }
