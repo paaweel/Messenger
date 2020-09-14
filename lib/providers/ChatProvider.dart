@@ -6,35 +6,36 @@ import 'package:kopper/config/Constants.dart';
 import 'package:kopper/config/Paths.dart';
 import 'package:kopper/config/Urls.dart';
 import 'package:kopper/models/Chat.dart';
+import 'package:kopper/models/Contact.dart';
 import 'package:kopper/models/Message.dart';
 import 'package:kopper/models/User.dart';
 import 'package:kopper/utils/SharedObjects.dart';
 import 'package:dart_amqp/dart_amqp.dart';
+import 'dart:convert';
 
 import 'BaseProvider.dart';
 
 class ChatProvider extends BaseChatProvider {
   Client _client;
-
+  static int _id = 0;
   List<Chat> _chats = List<Chat>();
-
   StreamController _chatsController;
-
-  static int id = 0;
+  List<StreamController> _messagesController;
 
   ChatProvider() {
-    ConnectionSettings settings =
-        ConnectionSettings(
-          host: Urls.host,
-          port: 52376,
-          authProvider: PlainAuthenticator(Constants.user, Constants.password),
-          virtualHost: Constants.hostName,
-
-          );
+    ConnectionSettings settings = ConnectionSettings(
+      host: Constants.hostName,
+      port: Constants.rabbitPort,
+      authProvider: PlainAuthenticator(Constants.user, Constants.password),
+      virtualHost: Constants.virtualHostName,
+    );
     _client = Client(settings: settings);
-    // _client.channel()
-    //   .then((Channel channel) => channel.exchange(Constants.incomingConvExchange, ExchangeType.TOPIC, durable: true))
-    //   .then((Exchange exchange) => exchange.bindQueueConsumer(Constants.mainQueue));
+    _client
+        .channel()
+        .then((Channel channel) => channel.exchange(
+            Constants.incomingConvExchange, ExchangeType.TOPIC, durable: true))
+        .then((Exchange exchange) =>
+            exchange.bindQueueConsumer(Constants.mainQueue, null));
     createChatsStream();
   }
 
@@ -47,6 +48,44 @@ class ChatProvider extends BaseChatProvider {
   Stream<List<Chat>> getChats() => _chatsController.stream;
 
   Stream<List<Message>> getMessages(int chatId) {
+    Chat chat =
+        _chats.firstWhere((chat) => chat.chatId == chatId, orElse: () => null);
+
+    // _client
+    //     .channel()
+    //     .then((Channel channel) => channel.basicReturnListener((message) {
+    //           print(message.payloadAsString);
+    //         }));
+    _client
+        .channel()
+        .then((Channel channel) => channel
+                .exchange(Constants.incomingConvExchange, ExchangeType.TOPIC,
+                    durable: true)
+                .then((Exchange exchange) {
+              exchange.bindPrivateQueueConsumer(["5"]);
+            }))
+        .then((Consumer consumer) => consumer.consumer);
+
+    return Stream.empty();
+    // // _client.channel().then((Channel channel) => channel.)
+    // _client
+    //     .channel() // auto-connect to localhost:5672 using guest credentials
+    //     .then((Channel channel) => channel.queue("hello"))
+    //     .then((Queue queue) => queue.consume())
+    //     .then((Consumer consumer) => consumer.listen((AmqpMessage message) {
+    //           // Get the payload as a string
+    //           print(" [x] Received string: ${message.payloadAsString}");
+
+    //           // Or unserialize to json
+    //           print(" [x] Received json: ${message.payloadAsJson}");
+
+    //           // Or just get the raw data as a Uint8List
+    //           print(" [x] Received raw: ${message.payload}");
+
+    //           // The message object contains helper methods for
+    //           // replying, ack-ing and rejecting
+    //           message.reply("world");
+    //         }));
     // DocumentReference chatDocRef =
     //     fireStoreDb.collection(Paths.chatsPath).document(chatId);
     // CollectionReference messagesCollection =
@@ -58,21 +97,25 @@ class ChatProvider extends BaseChatProvider {
     //         handleData:
     //             (QuerySnapshot querySnapshot, EventSink<List<Message>> sink) =>
     //                 mapDocumentToMessage(querySnapshot, sink)));
-    return Stream.empty();
   }
-  
+
   @override
   Future<void> sendMessage(int chatId, Message message) async {
-    print("Sending message to ");
-    print(chatId);
-    print(message.toString());
-    _client.channel()
-      .then((Channel channel) => channel.exchange(Constants.outgoingConvExchange, ExchangeType.FANOUT, durable: true)
-      .then((Exchange exchange) {
-        exchange.publish("Testing 1-2-3", null);
-        return _client.close();
-      })
-    );
+    print("Sending message: `" +
+        message.toString() +
+        "` to userId: " +
+        chatId.toString());
+
+    message.receiverUsername = getUsernameByChatId(chatId);
+    message.senderUsername = SharedObjects.username;
+
+    _client.channel().then((Channel channel) => channel
+            .exchange(Constants.outgoingConvExchange, ExchangeType.FANOUT,
+                durable: true)
+            .then((Exchange exchange) {
+          exchange.publish(json.encode(message.toMap()), null);
+          return _client.close();
+        }));
     // DocumentReference chatDocRef =
     //     fireStoreDb.collection(Paths.chatsPath).document(chatId);
     // CollectionReference messagesCollection =
@@ -83,35 +126,24 @@ class ChatProvider extends BaseChatProvider {
 
   @override
   Future<int> getChatIdByUsername(String username) async {
-    
-    // String uId = SharedObjects.prefs.getString(Constants.sessionUid);
-    // String selfUsername =
-    //     SharedObjects.prefs.getString(Constants.sessionUsername);
-    // DocumentReference userRef =
-    //     fireStoreDb.collection(Paths.usersPath).document(uId);
-    // DocumentSnapshot documentSnapshot = await userRef.get();
-    // String chatId = documentSnapshot.data['chats'][username];
-    // if (chatId == null) {
-    //   chatId = await createChatIdForUsers(selfUsername, username);
-    //   userRef.updateData({
-    //     'chats': {username: chatId}
-    //   });
-    // }
-
-    Chat chat = _chats.firstWhere((chat) => chat.username == username, orElse: () => null);
+    Chat chat = _chats.firstWhere((chat) => chat.username == username,
+        orElse: () => null);
     if (chat != null) {
       return chat.chatId;
     }
-    else {
-      createChatIdForContact(username);
-      return id - 1;
-    }
+    return -1;
+  }
+
+  String getUsernameByChatId(int chatId) {
+    Chat chat =
+        _chats.firstWhere((chat) => chat.chatId == chatId, orElse: () => null);
+    return chat == null ? "" : chat.username;
   }
 
   @override
-  Future<void> createChatIdForContact(String username) async {
-    Chat chat = Chat(username, id);
-    id = id + 1;
+  Future<void> createChatIdForContact(Contact contact) async {
+    Chat chat = Chat.fromContact(contact, _id);
+    _id = _id + 1;
     _chats.add(chat);
     _chatsController.sink.add(_chats);
     // String contactUid = user.documentId;

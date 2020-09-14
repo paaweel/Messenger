@@ -5,40 +5,41 @@ abstract class AuthenticationState extends Equatable {
   AuthenticationState([List props = const <dynamic>[]]) : super(props);
 }
 
-class Uninitialized extends AuthenticationState{
+class Uninitialized extends AuthenticationState {
   @override
   String toString() => 'Uninitialized';
 }
 
-class AuthInProgress extends AuthenticationState{
+class AuthInProgress extends AuthenticationState {
   @override
   String toString() => 'AuthInProgress';
 }
 
-class Authenticated extends AuthenticationState{
+class Authenticated extends AuthenticationState {
   final User user;
   Authenticated(this.user);
   @override
   String toString() => 'Authenticated';
 }
 
-class UnAuthenticated extends AuthenticationState{
+class UnAuthenticated extends AuthenticationState {
   @override
   String toString() => 'UnAuthenticated';
 }
 
-class ReceivedProfilePicture extends AuthenticationState{
+class ReceivedProfilePicture extends AuthenticationState {
   final File file;
   ReceivedProfilePicture(this.file);
-  @override toString() => 'ReceivedProfilePicture';
+  @override
+  toString() => 'ReceivedProfilePicture';
 }
 
-class ProfileUpdateInProgress extends AuthenticationState{
+class ProfileUpdateInProgress extends AuthenticationState {
   @override
   String toString() => 'ProfileUpdateInProgress';
 }
 
-class ProfileUpdated extends AuthenticationState{
+class ProfileUpdated extends AuthenticationState {
   @override
   String toString() => 'ProfileComplete';
 }

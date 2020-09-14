@@ -107,7 +107,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     print(user);
     yield FetchedContactDetailsState(user);
   }
-  
+
   @override
   Future<void> close() {
     messagesSubscription.cancel();

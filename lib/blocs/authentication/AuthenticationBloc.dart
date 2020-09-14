@@ -10,10 +10,8 @@ import 'package:kopper/repositories/StorageRepository.dart';
 import 'package:kopper/config/Paths.dart';
 import 'package:kopper/models/User.dart';
 
-
 part 'AuthenticationEvent.dart';
 part 'AuthenticationState.dart';
-
 
 class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
@@ -57,11 +55,14 @@ class AuthenticationBloc
   Stream<AuthenticationState> mapAppLaunchedToState() async* {
     try {
       yield AuthInProgress(); //show the progress bar
-      final isSignedIn = await authenticationRepository.isLoggedIn(); // check if user is signed in
+      final isSignedIn = await authenticationRepository
+          .isLoggedIn(); // check if user is signed in
       if (isSignedIn) {
         final user = await authenticationRepository.getCurrentUser();
-        yield Authenticated(user); // else yield the authenticated state and redirect to profile page to complete profile.
-        add(LoggedIn(user)); // also disptach a login event so that the data from gauth can be prefilled
+        yield Authenticated(
+            user); // else yield the authenticated state and redirect to profile page to complete profile.
+        add(LoggedIn(
+            user)); // also disptach a login event so that the data from gauth can be prefilled
       } else {
         yield UnAuthenticated(); // is not signed in then show the home page
       }
@@ -72,18 +73,19 @@ class AuthenticationBloc
   }
 
   Stream<AuthenticationState> mapClickedRegisterToState(User user) async* {
-    yield AuthInProgress();  //show progress bar
+    yield AuthInProgress(); //show progress bar
     try {
-      User authenticatedUser =
-          await authenticationRepository.signIn(user);
-      bool isProfileComplete =
-          await userDataRepository.isProfileComplete(); // check if the user's profile is complete
+      User authenticatedUser = await authenticationRepository.signIn(user);
+      bool isProfileComplete = await userDataRepository
+          .isProfileComplete(); // check if the user's profile is complete
       print(isProfileComplete);
       if (isProfileComplete) {
         yield ProfileUpdated(); //if profile is complete go to home page
       } else {
-        yield Authenticated(authenticatedUser); // else yield the authenticated state and redirect to profile page to complete profile.
-        add(LoggedIn(authenticatedUser)); // also dispatch a login event so that the data from gauth can be prefilled
+        yield Authenticated(
+            authenticatedUser); // else yield the authenticated state and redirect to profile page to complete profile.
+        add(LoggedIn(
+            authenticatedUser)); // also dispatch a login event so that the data from gauth can be prefilled
       }
     } catch (_, stacktrace) {
       print(stacktrace);
@@ -91,10 +93,12 @@ class AuthenticationBloc
     }
   }
 
-  Stream<AuthenticationState> mapClickedLoginToState(String username, String password) async* {
-    yield AuthInProgress();  //show progress bar
+  Stream<AuthenticationState> mapClickedLoginToState(
+      String username, String password) async* {
+    yield AuthInProgress(); //show progress bar
     try {
-      User authenticatedUser = await authenticationRepository.logIn(username, password);
+      User authenticatedUser =
+          await authenticationRepository.logIn(username, password);
       if (authenticatedUser == null)
         yield UnAuthenticated();
       else {
@@ -102,26 +106,25 @@ class AuthenticationBloc
         yield ProfileUpdated();
         add(LoggedIn(authenticatedUser));
       }
-
     } catch (_, stacktrace) {
       print(stacktrace);
       yield UnAuthenticated(); // in case of error go back to first registration page
     }
   }
 
-
-  Stream<AuthenticationState> mapLoggedInToState(
-      User user) async* {
+  Stream<AuthenticationState> mapLoggedInToState(User user) async* {
     yield ProfileUpdated(); // shows progress bar
   }
 
   Stream<AuthenticationState> mapSaveProfileToState(
       File profileImage, int age, String username) async* {
     yield ProfileUpdateInProgress(); // shows progress bar
-    String profilePictureUrl = await storageRepository.uploadImage(
-        profileImage, Paths.profilePicturePath); // upload image to firebase storage
-    User user = await authenticationRepository.getCurrentUser(); // retrieve user from firebase
-    await userDataRepository.saveProfileDetails(user.username, user.photoUrl); // save profile details to firestore
+    String profilePictureUrl = await storageRepository.uploadImage(profileImage,
+        Paths.profilePicturePath); // upload image to firebase storage
+    User user = await authenticationRepository
+        .getCurrentUser(); // retrieve user from firebase
+    await userDataRepository.saveProfileDetails(
+        user.username, user.photoUrl); // save profile details to firestore
     yield ProfileUpdated(); //redirect to home page
   }
 

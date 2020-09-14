@@ -32,7 +32,7 @@ class LoggedIn extends AuthenticationEvent {
   String toString() => 'LoggedIn';
 }
 
-class PickedProfilePicture extends AuthenticationEvent{
+class PickedProfilePicture extends AuthenticationEvent {
   final File file;
   PickedProfilePicture(this.file);
   @override

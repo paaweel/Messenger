@@ -21,7 +21,7 @@ class RequestsAuthenticationProvider extends BaseAuthenticationProvider {
   @override
   Future<User> logIn(String username, String password) async {
     _currentUser = null;
-  
+
     final response = await Requests.post(
       Urls.login,
       body: {"username": username, "password": password},
@@ -29,10 +29,11 @@ class RequestsAuthenticationProvider extends BaseAuthenticationProvider {
     );
     print(response.json());
     dynamic json = response.json();
-    
+
     if (response.success) {
       Urls.token = json['token'];
       SharedObjects.userId = json['id'];
+      SharedObjects.username = username;
       _currentUser = User.fromJson(json);
       _currentUser.password = password;
       saveCurrentUser(_currentUser);

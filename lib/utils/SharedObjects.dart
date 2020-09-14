@@ -1,9 +1,10 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:kopper/config/Constants.dart';
 
-class SharedObjects{
+class SharedObjects {
   static SharedPreferences prefs;
   static int userId;
+  static String username;
 }
 
 class CachedSharedPreferences {
@@ -18,7 +19,7 @@ class CachedSharedPreferences {
 
   static Future<CachedSharedPreferences> getInstance() async {
     sharedPreferences = await SharedPreferences.getInstance();
-    for(String key in cachedKeyList) {
+    for (String key in cachedKeyList) {
       map[key] = sharedPreferences.getString(key);
     }
     if (instance == null) instance = CachedSharedPreferences();
@@ -34,8 +35,7 @@ class CachedSharedPreferences {
 
   Future<bool> setString(String key, String value) async {
     bool result = await sharedPreferences.setString(key, value);
-    if (result)
-      map[key] = value;
+    if (result) map[key] = value;
     return result;
   }
 }

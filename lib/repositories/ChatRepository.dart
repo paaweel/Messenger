@@ -15,6 +15,6 @@ class ChatRepository {
       chatProvider.sendMessage(chatId, message);
   Future<int> getChatIdByUsername(String username) =>
       chatProvider.getChatIdByUsername(username);
-  Future<void> createChatIdForContact(String username) =>
-      chatProvider.createChatIdForContact(username);
+  Future<void> createChatIdForContact(Contact contact) =>
+      chatProvider.createChatIdForContact(contact);
 }

@@ -4,7 +4,8 @@ class Constants {
   static const sessionUsername = "sessionUsername";
   static const sessionUid = "sessionUid";
 
-  static const hostName = "localhost";
+  static const hostName = "10.0.2.2";
+  static const rabbitPort = 5672;
   static const mainQueue = "chat-app-messages";
   static const outgoingConvExchange = "conversation.outgoing";
   static const incomingConvExchange = "conversation.incoming";

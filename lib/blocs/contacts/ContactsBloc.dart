@@ -15,18 +15,18 @@ part 'ContactsStates.dart';
 class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
   UserDataRepository userDataRepository;
   ChatRepository chatRepository;
-  
+
   ContactsBloc({this.userDataRepository, this.chatRepository})
       : assert(userDataRepository != null),
         assert(chatRepository != null);
-        
+
   @override
   ContactsState get initialState => InitialContactsState();
 
   @override
   Stream<ContactsState> mapEventToState(
-      ContactsEvent event,
-      ) async* {
+    ContactsEvent event,
+  ) async* {
     if (event is FetchContactsEvent) {
       yield* mapFetchContactsEventToState();
     } else if (event is AddContactEvent) {
@@ -40,9 +40,11 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     try {
       yield FetchingContactsState();
       List<Contact> contacts = await userDataRepository.getContacts();
-      contacts.forEach((contact) async { await chatRepository.createChatIdForContact(contact.username); });
+      contacts.forEach((contact) async {
+        await chatRepository.createChatIdForContact(contact);
+      });
       yield FetchedContactsState(contacts);
-    } on KopperException catch(exception){
+    } on KopperException catch (exception) {
       print(exception.errorMessage());
       yield ErrorState(exception);
     }
@@ -52,10 +54,9 @@ class ContactsBloc extends Bloc<ContactsEvent, ContactsState> {
     try {
       yield AddContactProgressState();
       await userDataRepository.addContact(username);
-      await chatRepository.createChatIdForContact(username);
       add(FetchContactsEvent());
       yield AddContactSuccessState();
-    } on KopperException catch(exception){
+    } on KopperException catch (exception) {
       print(exception.errorMessage());
       yield AddContactFailedState(exception);
     }

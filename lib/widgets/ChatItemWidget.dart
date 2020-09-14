@@ -13,7 +13,6 @@ class ChatItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: implement build
     if (message.isSelf) {
-      //This is the sent message. We'll later use data from firebase instead of index to determine the message is sent or received.
       if (message is TextMessage) {
         final TextMessage textMessage = message as TextMessage;
         return Container(

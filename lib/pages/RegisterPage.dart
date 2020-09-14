@@ -17,7 +17,6 @@ import 'package:kopper/blocs/authentication/AuthenticationBloc.dart';
 class RegisterPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _RegisterPageState();
   }
 }
@@ -25,7 +24,6 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   int currentPage = 0;
-
   //fields for the form
   File profileImageFile;
   ImageProvider profileImage;
@@ -376,9 +374,9 @@ class _RegisterPageState extends State<RegisterPage>
     );
   }
 
-
-
-  buildTextInputWidget(String hintText, TextEditingController controller, FocusNode focusNode, {bool obscure = false}) {
+  buildTextInputWidget(
+      String hintText, TextEditingController controller, FocusNode focusNode,
+      {bool obscure = false}) {
     return Container(
         margin: EdgeInsets.only(top: 10),
         width: 120,
@@ -403,19 +401,24 @@ class _RegisterPageState extends State<RegisterPage>
   }
 
   buildFirstNameWidget() {
-    return buildTextInputWidget("First name", firstNameController, firstNameFocusNode);
+    return buildTextInputWidget(
+        "First name", firstNameController, firstNameFocusNode);
   }
 
   buildLastNameWidget() {
-    return buildTextInputWidget("Last name", lastNameController, lastNameFocusNode);
+    return buildTextInputWidget(
+        "Last name", lastNameController, lastNameFocusNode);
   }
 
   buildUsernameWidget() {
-    return buildTextInputWidget("@username", usernameController, usernameFocusNode);
+    return buildTextInputWidget(
+        "@username", usernameController, usernameFocusNode);
   }
 
   buildPasswordWidget() {
-    return buildTextInputWidget("*******", passwordController, passwordFocusNode, obscure:true);
+    return buildTextInputWidget(
+        "*******", passwordController, passwordFocusNode,
+        obscure: true);
   }
 
   updatePageState(index) {

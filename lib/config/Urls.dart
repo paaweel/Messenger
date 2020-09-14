@@ -1,6 +1,6 @@
 class Urls {
   static const String port = '5000';
-    // In AVD, 10.0.2.2 is mapped to 127.0.0.1 of the host
+  // In AVD, 10.0.2.2 is mapped to 127.0.0.1 of the host
   static const String host = "http://10.0.2.2";
   static const String address = host + ":" + port;
 

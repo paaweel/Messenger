@@ -6,6 +6,7 @@ abstract class Message {
   int timeStamp;
   String senderName;
   String senderUsername;
+  String receiverUsername;
   bool isSelf;
 
   Message(this.timeStamp, this.senderName, this.senderUsername);
@@ -49,11 +50,16 @@ class TextMessage extends Message {
   @override
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = Map();
-    map['text'] = text;
-    map['timeStamp'] = timeStamp;
-    map['senderName'] = senderName;
-    map['senderUsername'] = senderUsername;
-    map['type'] = 0;
+
+    map['SenderUsername'] = senderUsername;
+    map['ReceiverUsername'] = receiverUsername;
+    map['Content'] = text;
+
+    // map['text'] = text;
+    // map['timeStamp'] = timeStamp;
+    // map['senderName'] = senderName;
+    // map['senderUsername'] = senderUsername;
+    // map['type'] = 0;
     return map;
   }
 }
@@ -73,11 +79,11 @@ class ImageMessage extends Message {
   @override
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = Map();
-    map['imageUrl'] = imageUrl;
-    map['timeStamp'] = timeStamp;
-    map['senderName'] = senderName;
-    map['senderUsername'] = senderUsername;
-    map['type'] = 1;
+    // map['imageUrl'] = imageUrl;
+    // map['timeStamp'] = timeStamp;
+    map['SenderName'] = senderName;
+    map['SenderUsername'] = senderUsername;
+    // map['type'] = 1;
     return map;
   }
 }
