@@ -11,6 +11,7 @@ import 'package:kopper/providers/BaseProvider.dart';
 import 'package:kopper/utils/Exceptions.dart';
 import 'package:kopper/config/Constants.dart';
 import 'package:requests/requests.dart';
+import 'dart:convert';
 
 class UserDataProvider extends BaseUserDataProvider {
   final fireStoreDb = Firestore.instance;
@@ -40,8 +41,14 @@ class UserDataProvider extends BaseUserDataProvider {
       headers: {HttpHeaders.authorizationHeader: Urls.getToken()},
     );
 
-    var json = response.json();
-    json.forEach((contactJson) {
+    if (response.hasError) {
+      return contactList;
+    }
+
+    var jsons = response.json();
+    jsons.forEach((contactJson) {
+      print(contactJson);
+      // var decoded = json.decode(contactJson);
       contactList.add(Contact.fromJson(contactJson));
     });
     return contactList;
@@ -73,9 +80,11 @@ class UserDataProvider extends BaseUserDataProvider {
 
   @override
   Future<User> getUser(String username) async {
-    final response = await Requests.get(Urls.getUsers
-        // headers: {HttpHeaders.authorizationHeader: Urls.getToken()},
-        );
+    final response = await Requests.get(
+      Urls.getUsers,
+      bodyEncoding: RequestBodyEncoding.JSON,
+      headers: {HttpHeaders.authorizationHeader: Urls.getToken()},
+    );
 
     var json = response.json();
     User match;

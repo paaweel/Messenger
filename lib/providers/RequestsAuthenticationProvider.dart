@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kopper/utils/SharedObjects.dart';
 
@@ -6,6 +8,7 @@ import 'BaseProvider.dart';
 import 'package:kopper/config/Urls.dart';
 import 'package:requests/requests.dart';
 import 'package:kopper/models/User.dart';
+import 'dart:convert';
 
 class RequestsAuthenticationProvider extends BaseAuthenticationProvider {
   User _currentUser;
@@ -13,8 +16,21 @@ class RequestsAuthenticationProvider extends BaseAuthenticationProvider {
 
   @override
   Future<User> signIn(User user) async {
-    final response = await Requests.post(Urls.register, body: user.toString());
+    print(Urls.register);
+    final response = await Requests.post(Urls.register,
+        body: {
+          "username": user.username,
+          "password": user.password,
+          "LastName": user.lastName,
+          "FirstName": user.firstName
+        },
+        bodyEncoding: RequestBodyEncoding.JSON);
     print(response.content());
+
+    if (response.hasError) {
+      return null;
+    }
+
     return user;
   }
 
@@ -68,12 +84,16 @@ class RequestsAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   Future<User> readCurrentUser() async {
-    return User(
-        id: int.parse(await _storage.read(key: "id")),
-        firstName: await _storage.read(key: "firstname"),
-        lastName: await _storage.read(key: "lastname"),
-        username: await _storage.read(key: "username"),
-        password: await _storage.read(key: "password"));
+    var idString = await _storage.read(key: "id");
+    if (idString == null) {
+      return null;
+    } else
+      return User(
+          id: int.parse(idString),
+          firstName: await _storage.read(key: "firstname"),
+          lastName: await _storage.read(key: "lastname"),
+          username: await _storage.read(key: "username"),
+          password: await _storage.read(key: "password"));
   }
 
   @override

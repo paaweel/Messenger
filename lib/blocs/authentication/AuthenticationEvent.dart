@@ -22,7 +22,7 @@ class ClickedRegister extends AuthenticationEvent {
   final User user;
   ClickedRegister(this.user);
   @override
-  String toString() => 'ClickedLogin';
+  String toString() => 'ClickedRegister';
 }
 
 class LoggedIn extends AuthenticationEvent {

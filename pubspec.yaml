@@ -37,6 +37,7 @@ dependencies:
   flutter_secure_storage: ^3.3.3 # safe storage for sensitive data
   file_picker: ^1.12.0        
   dart_amqp: ^0.1.4           # dart support for amqp
+  flushbar: ^1.9.0
 
 
 

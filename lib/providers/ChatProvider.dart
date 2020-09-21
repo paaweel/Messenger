@@ -20,7 +20,10 @@ class ChatProvider extends BaseChatProvider {
   static int _id = 0;
   List<Chat> _chats = List<Chat>();
   StreamController _chatsController;
-  List<StreamController> _messagesController;
+  // StreamSubscription<AmqpMessage> _messagesSub;
+
+  // Map<int, StreamController<List<Message>>> _messageControlersMap;
+  // Map<int, List<Message>> _messagesMap;
 
   ChatProvider() {
     ConnectionSettings settings = ConnectionSettings(
@@ -30,12 +33,12 @@ class ChatProvider extends BaseChatProvider {
       virtualHost: Constants.virtualHostName,
     );
     _client = Client(settings: settings);
-    _client
-        .channel()
-        .then((Channel channel) => channel.exchange(
-            Constants.incomingConvExchange, ExchangeType.TOPIC, durable: true))
-        .then((Exchange exchange) =>
-            exchange.bindQueueConsumer(Constants.mainQueue, null));
+    // _client
+    //     .channel()
+    //     .then((Channel channel) => channel.exchange(
+    //         Constants.incomingConvExchange, ExchangeType.TOPIC, durable: true))
+    //     .then((Exchange exchange) =>
+    //         exchange.bindQueueConsumer(Constants.mainQueue, null));
     createChatsStream();
   }
 
@@ -48,66 +51,30 @@ class ChatProvider extends BaseChatProvider {
   Stream<List<Chat>> getChats() => _chatsController.stream;
 
   Stream<List<Message>> getMessages(int chatId) {
-    Chat chat =
-        _chats.firstWhere((chat) => chat.chatId == chatId, orElse: () => null);
-
-    // _client
-    //     .channel()
-    //     .then((Channel channel) => channel.basicReturnListener((message) {
-    //           print(message.payloadAsString);
-    //         }));
-    _client
-        .channel()
-        .then((Channel channel) => channel
-                .exchange(Constants.incomingConvExchange, ExchangeType.TOPIC,
-                    durable: true)
-                .then((Exchange exchange) {
-              exchange.bindPrivateQueueConsumer(["5"]);
-            }))
-        .then((Consumer consumer) => consumer.consumer);
+    List<String> routingKeys = ["5"];
+    _client.channel().then((Channel channel) {
+      return channel.exchange(
+          Constants.incomingConvExchange, ExchangeType.TOPIC,
+          durable: true);
+    }).then((Exchange exchange) {
+      print(" [*] Waiting for messages in logs. To Exit press CTRL+C");
+      return exchange.bindPrivateQueueConsumer(
+        routingKeys,
+      );
+    }).then((Consumer consumer) {
+      consumer.listen((AmqpMessage event) {
+        print(" [x] ${event.routingKey}:'${event.payloadAsString}'");
+      });
+    });
 
     return Stream.empty();
-    // // _client.channel().then((Channel channel) => channel.)
-    // _client
-    //     .channel() // auto-connect to localhost:5672 using guest credentials
-    //     .then((Channel channel) => channel.queue("hello"))
-    //     .then((Queue queue) => queue.consume())
-    //     .then((Consumer consumer) => consumer.listen((AmqpMessage message) {
-    //           // Get the payload as a string
-    //           print(" [x] Received string: ${message.payloadAsString}");
-
-    //           // Or unserialize to json
-    //           print(" [x] Received json: ${message.payloadAsJson}");
-
-    //           // Or just get the raw data as a Uint8List
-    //           print(" [x] Received raw: ${message.payload}");
-
-    //           // The message object contains helper methods for
-    //           // replying, ack-ing and rejecting
-    //           message.reply("world");
-    //         }));
-    // DocumentReference chatDocRef =
-    //     fireStoreDb.collection(Paths.chatsPath).document(chatId);
-    // CollectionReference messagesCollection =
-    //     chatDocRef.collection(Paths.messagesPath);
-    // return messagesCollection
-    //     .orderBy('timeStamp', descending: true)
-    //     .snapshots()
-    //     .transform(StreamTransformer<QuerySnapshot, List<Message>>.fromHandlers(
-    //         handleData:
-    //             (QuerySnapshot querySnapshot, EventSink<List<Message>> sink) =>
-    //                 mapDocumentToMessage(querySnapshot, sink)));
   }
 
   @override
   Future<void> sendMessage(int chatId, Message message) async {
-    print("Sending message: `" +
-        message.toString() +
-        "` to userId: " +
-        chatId.toString());
-
     message.receiverUsername = getUsernameByChatId(chatId);
     message.senderUsername = SharedObjects.username;
+    print(message.toMap());
 
     _client.channel().then((Channel channel) => channel
             .exchange(Constants.outgoingConvExchange, ExchangeType.FANOUT,
@@ -116,12 +83,6 @@ class ChatProvider extends BaseChatProvider {
           exchange.publish(json.encode(message.toMap()), null);
           return _client.close();
         }));
-    // DocumentReference chatDocRef =
-    //     fireStoreDb.collection(Paths.chatsPath).document(chatId);
-    // CollectionReference messagesCollection =
-    //     chatDocRef.collection(Paths.messagesPath);
-    // messagesCollection.add(message.toMap());
-    // await chatDocRef.updateData({'latestMessage': message.toMap()});
   }
 
   @override
@@ -142,26 +103,10 @@ class ChatProvider extends BaseChatProvider {
 
   @override
   Future<void> createChatIdForContact(Contact contact) async {
-    Chat chat = Chat.fromContact(contact, _id);
+    contact.chatId = _id;
+    Chat chat = Chat.fromContact(contact);
     _id = _id + 1;
     _chats.add(chat);
     _chatsController.sink.add(_chats);
-    // String contactUid = user.documentId;
-    // String contactUsername = user.username;
-    // String uId = SharedObjects.prefs.getString(Constants.sessionUid);
-    // String selfUsername = SharedObjects.prefs.getString(Constants.sessionUsername);
-    // CollectionReference usersCollection = fireStoreDb.collection(Paths.usersPath);
-    // DocumentReference userRef = usersCollection.document(uId);
-    // DocumentReference contactRef = usersCollection.document(contactUid);
-    // DocumentSnapshot userSnapshot = await userCRef.get();
-    // if(userSnapshot.data['chats']==null|| userSnapshot.data['chats'][contactUsername]==null){
-    // String chatId = await createChatIdForUsers(selfUsername, contactUsername);
-    // await userRef.setData({
-    //     'chats': {contactUsername: chatId}
-    //   },merge:true );
-    // await contactRef.setData({
-    //   'chats': {selfUsername: chatId}
-    // },merge: true);
-    // }
   }
 }

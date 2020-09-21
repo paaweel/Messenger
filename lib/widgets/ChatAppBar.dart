@@ -5,14 +5,17 @@ import 'package:kopper/config/Styles.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopper/blocs/chat/ChatBloc.dart';
 import 'package:kopper/models/Chat.dart';
+import 'package:kopper/models/Contact.dart';
 
 class ChatAppBar extends StatefulWidget implements PreferredSizeWidget {
   final double height = 100;
   final Chat chat;
-  ChatAppBar(this.chat);
+  final Contact contact;
+
+  ChatAppBar({this.contact, this.chat});
 
   @override
-  _ChatAppBarState createState() => _ChatAppBarState(chat);
+  _ChatAppBarState createState() => _ChatAppBarState(contact, chat);
 
   @override
   Size get preferredSize => Size.fromHeight(height);
@@ -24,12 +27,21 @@ class _ChatAppBarState extends State<ChatAppBar> {
   Image _image = Image.asset(Assets.user);
   ChatBloc chatBloc;
   Chat chat;
+  Contact contact;
 
-  _ChatAppBarState(this.chat);
+  _ChatAppBarState(this.contact, this.chat);
 
   @override
   void initState() {
     chatBloc = BlocProvider.of<ChatBloc>(context);
+    if (contact != null) {
+      _name = contact.firstName;
+      _username = contact.username;
+      _image = Image.asset(Assets.user);
+      chat = Chat.fromContact(contact);
+    } else {
+      _username = chat.username;
+    }
     super.initState();
   }
 
@@ -42,9 +54,10 @@ class _ChatAppBarState extends State<ChatAppBar> {
         if (state is FetchedContactDetailsState) {
           print('Received State of Page');
           print(state.user);
-          _name = state.user.lastName;
-          _username = state.user.username;
-          _image = Image.network(state.user.photoUrl);
+          if (state.user.username == _username) {
+            _name = state.user.firstName;
+            // _image = Image.network(state.user.photoUrl);
+          }
         }
         if (state is PageChangedState) {
           print(state.index);

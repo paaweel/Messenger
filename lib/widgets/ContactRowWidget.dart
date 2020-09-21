@@ -3,6 +3,8 @@ import 'package:kopper/config/Palette.dart';
 import 'package:kopper/models/Contact.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopper/blocs/contacts/ContactsBloc.dart';
+import 'package:kopper/pages/ConversationPageSlide.dart';
+import 'package:kopper/config/Transitions.dart';
 
 class ContactRowWidget extends StatelessWidget {
   const ContactRowWidget({
@@ -12,11 +14,15 @@ class ContactRowWidget extends StatelessWidget {
   final Contact contact;
 
   @override
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => BlocProvider.of<ContactsBloc>(context)
-          .add(ClickedContactEvent(contact)),
+      onTap: () => Navigator.push(
+          context,
+          SlideLeftRoute(
+            page: ConversationPageSlide(
+              startContact: contact,
+            ),
+          )),
       child: Container(
           color: Palette.primaryColor,
           child: Padding(

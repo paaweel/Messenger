@@ -3,28 +3,36 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kopper/blocs/chat/ChatBloc.dart';
 import 'package:kopper/config/Palette.dart';
 import 'package:kopper/models/Chat.dart';
+import 'package:kopper/models/Contact.dart';
 import 'package:kopper/widgets/ChatAppBar.dart';
 import 'package:kopper/widgets/ChatListWidget.dart';
 import 'dart:ui';
 
 class ConversationPage extends StatefulWidget {
   final Chat chat;
+  final Contact contact;
 
   @override
   _ConversationPageState createState() => _ConversationPageState(chat);
 
-  const ConversationPage(this.chat);
+  const ConversationPage({this.chat, this.contact});
 }
 
 class _ConversationPageState extends State<ConversationPage>
     with AutomaticKeepAliveClientMixin {
-  final Chat chat;
+  Chat chat;
+  Contact contact;
   ChatBloc chatBloc;
   _ConversationPageState(this.chat);
 
   @override
   void initState() {
     super.initState();
+    if (contact != null)
+      chat = Chat(
+          username: contact.username,
+          serverChatId: contact.serverChatId,
+          chatId: contact.chatId);
     print('init of $chat');
     chatBloc = BlocProvider.of<ChatBloc>(context);
     chatBloc.add(FetchConversationDetailsEvent(chat));
@@ -40,19 +48,14 @@ class _ConversationPageState extends State<ConversationPage>
             margin: EdgeInsets.only(top: 100),
             color: Palette.chatBackgroundColor,
             child: ChatListWidget(chat)),
-        SizedBox.fromSize(size: Size.fromHeight(100), child: ChatAppBar(chat))
+        SizedBox.fromSize(
+            size: Size.fromHeight(100),
+            child: ChatAppBar(
+              chat: chat,
+              contact: contact,
+            ))
       ],
     );
-    // return Column(children: <Widget>[
-    //   Expanded(flex: 2, child: ChatAppBar()), // Custom app bar for chat screen
-    //   Expanded(
-    //       flex: 11,
-    //       child: Container(
-    //         color: Palette.chatBackgroundColor,
-    //         child: ChatListWidget(),
-    //       ))
-    // ]
-    // );
   }
 
   @override

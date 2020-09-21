@@ -7,16 +7,14 @@ class Urls {
   static const String userPrefix = "/users";
   // Get requests
   static const String getUsers = address + userPrefix;
-  static String getContacts(int userId) {
-    return address + userPrefix + "/" + userId.toString() + "/contacts";
-  }
+  static String getContacts(int userId) =>
+      address + userPrefix + "/" + userId.toString() + "/contacts";
 
   // Post requests
   static const String register = address + userPrefix + "/register";
   static const String login = address + userPrefix + "/authenticate";
-  static String postContacts(int userId) {
-    return address + userPrefix + "/" + userId.toString() + "/contacts";
-  }
+  static String postContacts(int userId) =>
+      address + userPrefix + "/" + userId.toString() + "/contacts";
 
   // authorization
   static const authenticationPrefix = "Bearer ";

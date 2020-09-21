@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:kopper/config/Assets.dart';
 import 'package:kopper/config/Styles.dart';
+import 'package:kopper/models/Conversation.dart';
 
 class ChatRowWidget extends StatelessWidget {
+  // final Conversation conversation;
+
+  // ChatRowWidget(this.conversation);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -26,14 +31,14 @@ class ChatRowWidget extends StatelessWidget {
                   ),
                   Container(
                       child: Column(
-                        children: <Widget>[
-                          Text('John Doe', style: Styles.subHeading),
-                          Text(
-                            'What\'s up?',
-                            style: Styles.subText,
-                          )
-                        ],
-                      ))
+                    children: <Widget>[
+                      Text('John Doe', style: Styles.subHeading),
+                      Text(
+                        'What\'s up?',
+                        style: Styles.subText,
+                      )
+                    ],
+                  ))
                 ],
               ),
             ),

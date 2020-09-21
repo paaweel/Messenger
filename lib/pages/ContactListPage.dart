@@ -14,6 +14,7 @@ import 'package:kopper/widgets/GradientFab.dart';
 import 'package:kopper/widgets/QuickScrollBar.dart';
 import 'package:kopper/pages/ConversationPageSlide.dart';
 import 'package:kopper/config/Transitions.dart';
+import 'package:kopper/widgets/GradientSnackBar.dart';
 
 class ContactListPage extends StatefulWidget {
   @override
@@ -25,11 +26,12 @@ class ContactListPage extends StatefulWidget {
 class _ContactListPageState extends State<ContactListPage>
     with TickerProviderStateMixin {
   ContactsBloc contactsBloc;
-  ScrollController scrollController;
-  final TextEditingController usernameController = TextEditingController();
   List<Contact> contacts;
+
   AnimationController animationController;
   Animation<double> animation;
+  final TextEditingController usernameController = TextEditingController();
+  ScrollController scrollController;
 
   @override
   void initState() {
@@ -55,89 +57,69 @@ class _ContactListPageState extends State<ContactListPage>
     return SafeArea(
       child: Scaffold(
         backgroundColor: Palette.primaryBackgroundColor,
-        body: BlocProvider<ContactsBloc>(
-            create: (context) => contactsBloc,
-            child: BlocListener<ContactsBloc, ContactsState>(
-              bloc: contactsBloc,
-              listener: (bc, state) {
-                print(state);
-                if (state is AddContactSuccessState) {
-                  Navigator.pop(context);
-                  final snackBar = SnackBar(
-                      behavior: SnackBarBehavior.floating,
-                      content: Text("Contact Added Successfully!"));
-                  Scaffold.of(bc).showSnackBar(snackBar);
-                } else if (state is ErrorState) {
-                  final snackBar = SnackBar(
-                      behavior: SnackBarBehavior.floating,
-                      content: Text(state.exception.errorMessage()));
-                  Scaffold.of(bc).showSnackBar(snackBar);
-                } else if (state is AddContactFailedState) {
-                  Navigator.pop(context);
-                  final snackBar = SnackBar(
-                      behavior: SnackBarBehavior.floating,
-                      content: Text(state.exception.errorMessage()));
-                  Scaffold.of(bc).showSnackBar(snackBar);
-                } else if (state is ClickedContactState) {
-                  Navigator.push(
-                      context,
-                      SlideLeftRoute(
-                          page: ConversationPageSlide(
-                              startContact: state.contact)));
-                }
-              },
-              child: Stack(
-                children: <Widget>[
-                  CustomScrollView(
-                      controller: scrollController,
-                      slivers: <Widget>[
-                        SliverAppBar(
-                          backgroundColor: Palette.primaryBackgroundColor,
-                          expandedHeight: 180.0,
-                          pinned: true,
-                          elevation: 0,
-                          centerTitle: true,
-                          flexibleSpace: FlexibleSpaceBar(
-                            centerTitle: true,
-                            title: Text("Contacts", style: Styles.appBarTitle),
-                          ),
-                        ),
-                        BlocBuilder<ContactsBloc, ContactsState>(
-                            builder: (context, state) {
-                          print(state);
-                          if (state is FetchingContactsState) {
-                            return SliverToBoxAdapter(
-                              child: Container(
-                                  margin: EdgeInsets.only(top: 20),
-                                  child: Center(
-                                      child: CircularProgressIndicator())),
-                            );
-                          }
-
-                          if (state is FetchedContactsState)
-                            contacts = state.contacts;
-
-                          return SliverList(
-                            delegate:
-                                SliverChildBuilderDelegate((context, index) {
-                              return ContactRowWidget(contact: contacts[index]);
-                            }, childCount: contacts.length),
-                          );
-                        })
-                      ]),
-                  Container(
-                    margin: EdgeInsets.only(top: 190),
-                    child: BlocBuilder<ContactsBloc, ContactsState>(
-                        builder: (context, state) {
-                      return QuickScrollBar(
-                        nameList: contacts,
-                        scrollController: scrollController,
-                      );
-                    }),
+        body: BlocListener<ContactsBloc, ContactsState>(
+          listener: (bc, state) {
+            print(state);
+            if (state is AddContactSuccessState) {
+              Navigator.pop(context);
+              GradientSnackBar.showMessage(
+                  context, "Contact Added Successfully!");
+            } else if (state is ErrorState) {
+              GradientSnackBar.showError(
+                  context, state.exception.errorMessage());
+            } else if (state is AddContactFailedState) {
+              Navigator.pop(context);
+              GradientSnackBar.showError(
+                  context, state.exception.errorMessage());
+            }
+          },
+          child: Stack(
+            children: <Widget>[
+              CustomScrollView(controller: scrollController, slivers: <Widget>[
+                SliverAppBar(
+                  backgroundColor: Palette.primaryBackgroundColor,
+                  expandedHeight: 180.0,
+                  pinned: true,
+                  elevation: 0,
+                  centerTitle: true,
+                  flexibleSpace: FlexibleSpaceBar(
+                    centerTitle: true,
+                    title: Text("Contacts", style: Styles.appBarTitle),
                   ),
-                ],
+                ),
+                BlocBuilder<ContactsBloc, ContactsState>(
+                    builder: (context, state) {
+                  print(state);
+                  if (state is FetchingContactsState) {
+                    return SliverToBoxAdapter(
+                      child: Container(
+                          margin: EdgeInsets.only(top: 20),
+                          child: Center(child: CircularProgressIndicator())),
+                    );
+                  }
+
+                  if (state is FetchedContactsState) contacts = state.contacts;
+
+                  return SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      return ContactRowWidget(contact: contacts[index]);
+                    }, childCount: contacts.length),
+                  );
+                })
+              ]),
+              Container(
+                margin: EdgeInsets.only(top: 190),
+                child: BlocBuilder<ContactsBloc, ContactsState>(
+                    builder: (context, state) {
+                  return QuickScrollBar(
+                    nameList: contacts,
+                    scrollController: scrollController,
+                  );
+                }),
               ),
-            )),
+            ],
+          ),
+        ),
         floatingActionButton: GradientFab(
           child: Icon(Icons.add),
           animation: animation,

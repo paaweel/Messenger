@@ -50,6 +50,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
     if (event is PageChangedEvent) {
       activeChatId = event.activeChat.chatId;
+      yield PageChangedState(event.index, event.activeChat);
     }
     if (event is FetchConversationDetailsEvent) {
       add(FetchMessagesEvent(event.chat));
@@ -106,6 +107,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     User user = await userDataRepository.getUser(event.chat.username);
     print(user);
     yield FetchedContactDetailsState(user);
+    add(FetchMessagesEvent(event.chat));
   }
 
   @override

@@ -37,6 +37,8 @@ class AuthenticationBloc
     print(event);
     if (event is AppLaunched) {
       yield* mapAppLaunchedToState();
+    } else if (event is ClickedRegister) {
+      yield* mapClickedRegisterToState(event.user);
     } else if (event is ClickedLogin) {
       print(event.username + event.password);
       yield* mapClickedLoginToState(event.username, event.password);
@@ -75,17 +77,21 @@ class AuthenticationBloc
   Stream<AuthenticationState> mapClickedRegisterToState(User user) async* {
     yield AuthInProgress(); //show progress bar
     try {
-      User authenticatedUser = await authenticationRepository.signIn(user);
-      bool isProfileComplete = await userDataRepository
-          .isProfileComplete(); // check if the user's profile is complete
-      print(isProfileComplete);
-      if (isProfileComplete) {
-        yield ProfileUpdated(); //if profile is complete go to home page
+      User registeredUser = await authenticationRepository.signIn(user);
+      if (registeredUser == null) {
+        yield UnAuthenticated();
       } else {
-        yield Authenticated(
-            authenticatedUser); // else yield the authenticated state and redirect to profile page to complete profile.
-        add(LoggedIn(
-            authenticatedUser)); // also dispatch a login event so that the data from gauth can be prefilled
+        User authenticatedUser =
+            await authenticationRepository.logIn(user.username, user.password);
+
+        if (authenticatedUser == null) {
+          yield UnAuthenticated();
+        } else {
+          yield Authenticated(
+              registeredUser); // else yield the authenticated state and redirect to profile page to complete profile.
+          add(LoggedIn(
+              registeredUser)); // also dispatch a login event so that the data from gauth can be prefilled
+        }
       }
     } catch (_, stacktrace) {
       print(stacktrace);

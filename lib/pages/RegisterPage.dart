@@ -501,13 +501,13 @@ class _RegisterPageState extends State<RegisterPage>
               children: <Widget>[
                 FloatingActionButton(
                   onPressed: () => authenticationBloc.add(loggingIn
-                      ? ClickedLogin(
-                          usernameController.text, passwordController.text)
+                      ? ClickedLogin(usernameController.text.trim(),
+                          passwordController.text.trim())
                       : ClickedRegister(User(
-                          firstName: firstNameController.text,
-                          lastName: lastNameController.text,
-                          username: usernameController.text,
-                          password: usernameController.text))),
+                          firstName: firstNameController.text.trim(),
+                          lastName: lastNameController.text.trim(),
+                          username: usernameController.text.trim(),
+                          password: usernameController.text.trim()))),
                   elevation: 0,
                   backgroundColor: Palette.primaryColor,
                   child: Icon(

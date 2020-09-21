@@ -71,7 +71,7 @@ class _ConversationPageSlideState extends State<ConversationPageSlide>
                                 BlocProvider.of<ChatBloc>(context).add(
                                     PageChangedEvent(index, chatList[index])),
                             itemBuilder: (bc, index) =>
-                                ConversationPage(chatList[index]));
+                                ConversationPage(chat: chatList[index]));
                       },
                     ))),
                 Container(
