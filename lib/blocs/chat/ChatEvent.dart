@@ -42,8 +42,10 @@ class FetchMessagesEvent extends ChatEvent {
 //triggered when messages stream has new data
 class ReceivedMessagesEvent extends ChatEvent {
   final List<Message> messages;
+  final String username;
 
-  ReceivedMessagesEvent(this.messages) : super([messages]);
+  ReceivedMessagesEvent(this.messages, this.username)
+      : super([messages, username]);
 
   @override
   String toString() => 'ReceivedMessagesEvent';

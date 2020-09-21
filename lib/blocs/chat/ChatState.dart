@@ -18,7 +18,9 @@ class FetchedChatListState extends ChatState {
 
 class FetchedMessagesState extends ChatState {
   final List<Message> messages;
-   FetchedMessagesState(this.messages) : super([messages]);
+  final String username;
+  FetchedMessagesState(this.messages, this.username)
+      : super([messages, username]);
   @override
   String toString() => 'FetchedMessagesState';
 }

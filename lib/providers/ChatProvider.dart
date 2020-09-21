@@ -16,14 +16,14 @@ import 'dart:convert';
 import 'BaseProvider.dart';
 
 class ChatProvider extends BaseChatProvider {
-  Client _client;
+  Client _client = Client();
   static int _id = 0;
   List<Chat> _chats = List<Chat>();
   StreamController _chatsController;
-  // StreamSubscription<AmqpMessage> _messagesSub;
 
-  // Map<int, StreamController<List<Message>>> _messageControlersMap;
-  // Map<int, List<Message>> _messagesMap;
+  Map<int, Client> _clientsMap = Map();
+  Map<int, StreamController> _streamControllerMap = Map();
+  Map<int, List<Message>> _messagesMap = Map();
 
   ChatProvider() {
     ConnectionSettings settings = ConnectionSettings(
@@ -33,12 +33,6 @@ class ChatProvider extends BaseChatProvider {
       virtualHost: Constants.virtualHostName,
     );
     _client = Client(settings: settings);
-    // _client
-    //     .channel()
-    //     .then((Channel channel) => channel.exchange(
-    //         Constants.incomingConvExchange, ExchangeType.TOPIC, durable: true))
-    //     .then((Exchange exchange) =>
-    //         exchange.bindQueueConsumer(Constants.mainQueue, null));
     createChatsStream();
   }
 
@@ -51,8 +45,18 @@ class ChatProvider extends BaseChatProvider {
   Stream<List<Chat>> getChats() => _chatsController.stream;
 
   Stream<List<Message>> getMessages(int chatId) {
-    List<String> routingKeys = ["5"];
-    _client.channel().then((Channel channel) {
+    Chat chat = getChatById(chatId);
+    if (chat == null) return Stream.empty();
+
+    List<String> routingKeys = [chat.serverChatId.toString()];
+    _clientsMap[chatId] = Client();
+    _messagesMap[chatId] = List<Message>(); // get old ones here
+    _streamControllerMap[chatId] = StreamController<List<Message>>();
+    _streamControllerMap[chatId].sink.add(_messagesMap[chatId]);
+
+    print(" Will listen for routing key:'${chat.serverChatId.toString()}'");
+
+    _clientsMap[chatId].channel().then((Channel channel) {
       return channel.exchange(
           Constants.incomingConvExchange, ExchangeType.TOPIC,
           durable: true);
@@ -64,10 +68,12 @@ class ChatProvider extends BaseChatProvider {
     }).then((Consumer consumer) {
       consumer.listen((AmqpMessage event) {
         print(" [x] ${event.routingKey}:'${event.payloadAsString}'");
+        _messagesMap[chatId].add(Message.fromJson(event.payloadAsJson));
+        _streamControllerMap[chatId].sink.add(_messagesMap[chatId]);
       });
     });
 
-    return Stream.empty();
+    return _streamControllerMap[chatId].stream;
   }
 
   @override
@@ -96,8 +102,7 @@ class ChatProvider extends BaseChatProvider {
   }
 
   String getUsernameByChatId(int chatId) {
-    Chat chat =
-        _chats.firstWhere((chat) => chat.chatId == chatId, orElse: () => null);
+    Chat chat = getChatById(chatId);
     return chat == null ? "" : chat.username;
   }
 
@@ -108,5 +113,11 @@ class ChatProvider extends BaseChatProvider {
     _id = _id + 1;
     _chats.add(chat);
     _chatsController.sink.add(_chats);
+  }
+
+  Chat getChatById(int chatId) {
+    Chat chat =
+        _chats.firstWhere((chat) => chat.chatId == chatId, orElse: () => null);
+    return chat;
   }
 }

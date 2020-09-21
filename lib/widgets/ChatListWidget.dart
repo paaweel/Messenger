@@ -41,15 +41,12 @@ class _ChatListWidgetState extends State<ChatListWidget> {
     return BlocBuilder<ChatBloc, ChatState>(builder: (context, state) {
       print('chatlist');
       print(state);
-      // if (state is FetchedMessagesState) {
-      //   if (state.username == chat.username) {
-      //     print(state.messages);
-      //     if (state.isPrevious)
-      //       messages.addAll(state.messages);
-      //     else
-      //       messages = state.messages;
-      //   }
-      // }
+      if (state is FetchedMessagesState) {
+        print('Received Messages');
+        if (state.username == chat.username) {
+          messages.addAll(state.messages);
+        }
+      }
       return ListView.builder(
         padding: EdgeInsets.all(10.0),
         itemBuilder: (context, index) => ChatItemWidget(messages[index]),

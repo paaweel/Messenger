@@ -24,7 +24,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final UserDataRepository userDataRepository;
   final StorageRepository storageRepository;
 
-  StreamSubscription messagesSubscription;
+  Map<int, StreamSubscription> messagesSubscriptionMap = Map();
   StreamSubscription chatsSubscription;
   int activeChatId;
 
@@ -61,7 +61,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
     if (event is ReceivedMessagesEvent) {
       print(event.messages);
-      yield FetchedMessagesState(event.messages);
+      yield FetchedMessagesState(event.messages, event.username);
     }
     if (event is SendTextMessageEvent) {
       Message message = TextMessage(
@@ -92,10 +92,15 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       yield InitialChatState();
       int chatId =
           await chatRepository.getChatIdByUsername(event.chat.username);
+
+      StreamSubscription messagesSubscription = messagesSubscriptionMap[chatId];
+
       messagesSubscription?.cancel();
-      messagesSubscription = chatRepository
-          .getMessages(chatId)
-          .listen((messages) => add(ReceivedMessagesEvent(messages)));
+      messagesSubscription = chatRepository.getMessages(chatId).listen(
+          (messages) =>
+              add(ReceivedMessagesEvent(messages, event.chat.username)));
+
+      messagesSubscriptionMap[chatId] = messagesSubscription;
     } on KopperException catch (exception) {
       print(exception.errorMessage());
       yield ErrorState(exception);
@@ -112,8 +117,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   @override
   Future<void> close() {
-    messagesSubscription.cancel();
-
+    messagesSubscriptionMap.forEach((_, subscription) => subscription.cancel());
     return super.close();
   }
 }
