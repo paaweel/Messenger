@@ -1,3 +1,5 @@
+import 'Conversation.dart';
+
 class Contact {
   String username;
   String firstName;
@@ -21,6 +23,15 @@ class Contact {
         username: contactJson['username'] as String);
     if (c.lastName == null) c.lastName = "Smith";
     return c;
+  }
+
+  factory Contact.fromConversation(Conversation conversation) {
+    return Contact(
+        username: conversation.user.username,
+        chatId: conversation.chatId,
+        firstName: conversation.user.firstName,
+        lastName: conversation.user.lastName,
+        serverChatId: conversation.serverChatId);
   }
 
   @override

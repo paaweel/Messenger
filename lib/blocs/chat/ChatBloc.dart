@@ -60,8 +60,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       yield* mapFetchMessagesEventToState(event);
     }
     if (event is ReceivedMessagesEvent) {
-      print(event.messages);
-      yield FetchedMessagesState(event.messages, event.username);
+      yield* mapReceivedMessagesEventToState(event);
+      // yield FetchedMessagesState(event.messages, event.username);
     }
     if (event is SendTextMessageEvent) {
       Message message = TextMessage(
@@ -70,6 +70,17 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           SharedObjects.prefs.getString(Constants.sessionName),
           SharedObjects.prefs.getString(Constants.sessionUsername));
       await chatRepository.sendMessage(activeChatId, message);
+    }
+  }
+
+  Stream<ChatState> mapReceivedMessagesEventToState(
+      ReceivedMessagesEvent event) async* {
+    try {
+      yield FetchedMessagesState(event.messages, event.username);
+      yield MessagesAcknowelged();
+    } on KopperException catch (exception) {
+      print(exception.errorMessage());
+      yield ErrorState(exception);
     }
   }
 
@@ -91,14 +102,17 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     try {
       yield InitialChatState();
       int chatId =
-          await chatRepository.getChatIdByUsername(event.chat.username);
+          await chatRepository.getChatIdByUsername(event.chat.user.username);
 
       StreamSubscription messagesSubscription = messagesSubscriptionMap[chatId];
 
       messagesSubscription?.cancel();
       messagesSubscription = chatRepository.getMessages(chatId).listen(
           (messages) =>
-              add(ReceivedMessagesEvent(messages, event.chat.username)));
+              add(ReceivedMessagesEvent(messages, event.chat.user.username)),
+          onDone: () => print("done"),
+          onError: (error) => print("error"),
+          cancelOnError: false);
 
       messagesSubscriptionMap[chatId] = messagesSubscription;
     } on KopperException catch (exception) {
@@ -109,7 +123,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   Stream<ChatState> mapFetchConversationDetailsEventToState(
       FetchConversationDetailsEvent event) async* {
-    User user = await userDataRepository.getUser(event.chat.username);
+    User user = await userDataRepository.getUser(event.chat.user.username);
     print(user);
     yield FetchedContactDetailsState(user);
     add(FetchMessagesEvent(event.chat));

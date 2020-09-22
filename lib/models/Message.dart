@@ -4,15 +4,22 @@ import 'package:kopper/utils/SharedObjects.dart';
 
 abstract class Message {
   int timeStamp;
-  String senderName;
   String senderUsername;
   String receiverUsername;
-  bool isSelf;
+  bool isSelf = true;
 
   Message(this.timeStamp, this.senderUsername, this.receiverUsername);
 
-  factory Message.fromJson(Map<String, dynamic> json) {
-    return TextMessage.fromJson(json);
+  bool operator ==(covariant Message rhs) {
+    return timeStamp == rhs.timeStamp;
+  }
+
+  factory Message.fromServerJson(Map<String, dynamic> json) {
+    return TextMessage.fromServerJson(json);
+  }
+
+  factory Message.fromRabbitJson(Map<String, dynamic> json) {
+    return TextMessage.fromRabbitJson(json);
   }
 
   // factory Message.fromFireStore(DocumentSnapshot doc) {
@@ -45,15 +52,25 @@ class TextMessage extends Message {
   TextMessage(this.text, timeStamp, senderUsername, receiverUsername)
       : super(timeStamp, senderUsername, receiverUsername);
 
-  factory TextMessage.fromJson(Map<String, dynamic> json) {
-    return TextMessage(json['Content'] as String, 0,
-        json['SenderUsername'] as String, json['ReceiverUsername'] as String);
+  factory TextMessage.fromServerJson(Map<String, dynamic> json) {
+    return TextMessage(
+        (json['content'] ?? "") as String,
+        DateTime.parse(json['timeStamp'] as String).millisecondsSinceEpoch,
+        json['senderUsername'] as String,
+        json['receiverUsername'] as String);
   }
 
-  factory TextMessage.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data;
-    return TextMessage(data['text'], data['timeStamp'], data['senderName'],
-        data['senderUsername']);
+  factory TextMessage.fromRabbitJson(Map<String, dynamic> json) {
+    return TextMessage(
+        (json['Content'] ?? "") as String,
+        DateTime.now().millisecondsSinceEpoch,
+        json['SenderUsername'] as String,
+        json['ReceiverUsername'] as String);
+  }
+
+  @override
+  bool operator ==(covariant TextMessage rhs) {
+    return timeStamp == rhs.timeStamp && text == rhs.text;
   }
 
   @override

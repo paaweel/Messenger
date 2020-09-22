@@ -25,6 +25,11 @@ class FetchedMessagesState extends ChatState {
   String toString() => 'FetchedMessagesState';
 }
 
+class MessagesAcknowelged extends ChatState {
+  @override
+  String toString() => 'MessagesAcknowelged';
+}
+
 class ErrorState extends ChatState {
   final Exception exception;
   ErrorState(this.exception) : super([exception]);

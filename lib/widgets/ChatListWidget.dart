@@ -18,42 +18,49 @@ class _ChatListWidgetState extends State<ChatListWidget> {
   final ScrollController listScrollController = ScrollController();
   List<Message> messages = List();
   final Chat chat;
+  ChatBloc chatBloc;
 
   _ChatListWidgetState(this.chat);
 
   @override
   void initState() {
     super.initState();
+    chatBloc = BlocProvider.of<ChatBloc>(context);
     listScrollController.addListener(() {
       double maxScroll = listScrollController.position.maxScrollExtent;
       double currentScroll = listScrollController.position.pixels;
-      // if (maxScroll == currentScroll) {
-      //   print('scrolledtoTop');
-      //   BlocProvider.of<ChatBloc>(context)
-      //       .add(FetchPreviousMessagesEvent(this.chat,messages.last));
-      // }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    return BlocBuilder<ChatBloc, ChatState>(builder: (context, state) {
-      print('chatlist');
-      print(state);
-      if (state is FetchedMessagesState) {
-        print('Received Messages');
-        if (state.username == chat.username) {
-          messages.addAll(state.messages);
-        }
-      }
-      return ListView.builder(
-        padding: EdgeInsets.all(10.0),
-        itemBuilder: (context, index) => ChatItemWidget(messages[index]),
-        itemCount: messages.length,
-        reverse: true,
-        controller: listScrollController,
-      );
-    });
+    return BlocListener<ChatBloc, ChatState>(
+        bloc: chatBloc,
+        listener: (context, state) {
+          print('chatlist');
+          print(state);
+          if (state is FetchedMessagesState) {
+            print('Received Messages');
+            if (state.username == chat.user.username) {
+              setState(() {
+                messages = state.messages;
+              });
+            }
+          }
+        },
+        child: ListView.builder(
+          padding: EdgeInsets.all(10.0),
+          itemBuilder: (context, index) => ChatItemWidget(messages[index]),
+          itemCount: messages.length,
+          reverse: true,
+          controller: listScrollController,
+        ));
+  }
+
+  Future<void> scrollToBottom() async {
+    listScrollController.animateTo(
+        0.0, //listScrollController.position.maxScrollExtent,
+        duration: Duration(seconds: 1),
+        curve: Curves.fastOutSlowIn);
   }
 }

@@ -28,11 +28,7 @@ class _ConversationPageState extends State<ConversationPage>
   @override
   void initState() {
     super.initState();
-    if (contact != null)
-      chat = Chat(
-          username: contact.username,
-          serverChatId: contact.serverChatId,
-          chatId: contact.chatId);
+    if (contact != null) chat = Chat.fromContact(contact);
     print('init of $chat');
     chatBloc = BlocProvider.of<ChatBloc>(context);
     chatBloc.add(FetchConversationDetailsEvent(chat));

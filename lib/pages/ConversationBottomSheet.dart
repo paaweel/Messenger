@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kopper/config/Palette.dart';
-import 'package:kopper/config/Styles.dart';
-import 'package:kopper/widgets/ChatRowWidget.dart';
 import 'package:kopper/widgets/NavigationPillWidget.dart';
+import 'package:kopper/widgets/ConversationListWidget.dart';
 
 class ConversationBottomSheet extends StatefulWidget {
   @override
@@ -15,42 +13,30 @@ class ConversationBottomSheet extends StatefulWidget {
 class _ConversationBottomSheetState extends State<ConversationBottomSheet> {
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return SafeArea(
         child: Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: Theme.of(context).primaryColor,
             body: ListView(children: <Widget>[
               GestureDetector(
                 child: ListView(
-                  shrinkWrap: true,
-                  physics: ClampingScrollPhysics(),
-                  children: <Widget>[
-                    NavigationPillWidget(),
-                    Center(child: Text('Messages', style: Styles.textHeading)),
-                    SizedBox(
-                      height: 20,
-                    ),
-                  ],
-                ),
+                    shrinkWrap: true,
+                    physics: ClampingScrollPhysics(),
+                    children: <Widget>[
+                      NavigationPillWidget(),
+                      Center(
+                          child: Text('Messages',
+                              style: Theme.of(context).textTheme.title)),
+                      SizedBox(
+                        height: 20,
+                      ),
+                    ]),
                 onVerticalDragEnd: (details) {
-                  print("onVerticalDragEnd");
-                  if (details.primaryVelocity > 60) {
+                  if (details.primaryVelocity > 50) {
                     Navigator.pop(context);
                   }
                 },
               ),
-              ListView.separated(
-                shrinkWrap: true,
-                physics: ClampingScrollPhysics(),
-                itemCount: 5,
-                separatorBuilder: (context, index) => Padding(
-                    padding: EdgeInsets.only(left: 75, right: 20),
-                    child: Divider(
-                      color: Palette.accentColor,
-                    )),
-                itemBuilder: (context, index) {
-                  return ChatRowWidget();
-                },
-              )
+              ConversationListWidget(),
             ])));
   }
 }

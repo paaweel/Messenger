@@ -5,18 +5,21 @@ class Urls {
   static const String address = host + ":" + port;
 
   static const String userPrefix = "/users";
-  // Get requests
+  // Contacts
   static const String getUsers = address + userPrefix;
   static String getContacts(int userId) =>
       address + userPrefix + "/" + userId.toString() + "/contacts";
 
-  // Post requests
+  static String getMessages(int userId, String username) =>
+      address + userPrefix + "/" + userId.toString() + "/contacts/" + username;
+
+  // Login/Sign-in
   static const String register = address + userPrefix + "/register";
   static const String login = address + userPrefix + "/authenticate";
   static String postContacts(int userId) =>
       address + userPrefix + "/" + userId.toString() + "/contacts";
 
-  // authorization
+  // Authorization
   static const authenticationPrefix = "Bearer ";
   static String token = "";
   static String getToken() => authenticationPrefix + token;

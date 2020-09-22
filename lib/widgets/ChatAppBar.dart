@@ -40,7 +40,7 @@ class _ChatAppBarState extends State<ChatAppBar> {
       _image = Image.asset(Assets.user);
       chat = Chat.fromContact(contact);
     } else {
-      _username = chat.username;
+      _username = chat.user.username;
     }
     super.initState();
   }
@@ -67,7 +67,6 @@ class _ChatAppBarState extends State<ChatAppBar> {
       child: Material(
           child: Container(
               decoration: BoxDecoration(boxShadow: [
-                //adds a shadow to the appbar
                 BoxShadow(
                     color: Colors.grey, blurRadius: 2.0, spreadRadius: 0.1)
               ]),
